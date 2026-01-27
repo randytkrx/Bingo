@@ -17,6 +17,7 @@
             --gold-light: #f4d03f;
             --purple: #a020a0;
             --dark-purple: #4a0e4a;
+            --discord-blue: #5865F2;
         }
 
         body {
@@ -29,7 +30,7 @@
             overflow-x: hidden;
         }
 
-        /* Join Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -50,7 +51,7 @@
             border-radius: 20px;
             padding: 40px;
             text-align: center;
-            max-width: 420px;
+            max-width: 500px;
             width: 90%;
             box-shadow: 0 0 60px rgba(212, 160, 23, 0.4);
         }
@@ -63,7 +64,13 @@
             text-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
         }
 
-        .modal input {
+        .modal p {
+            color: #ccc;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .modal input[type="text"] {
             width: 100%;
             padding: 15px;
             font-family: 'Pirata One', cursive;
@@ -77,14 +84,127 @@
             transition: all 0.3s;
         }
 
-        .modal input:focus {
+        .modal input[type="text"]:focus {
             outline: none;
             border-color: var(--gold-light);
             box-shadow: 0 0 20px rgba(244, 208, 63, 0.4);
         }
 
-        .modal input::placeholder {
+        .modal input[type="text"]::placeholder {
             color: #888;
+        }
+
+        /* File Upload */
+        .file-upload-area {
+            border: 3px dashed var(--gold);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--gold-light);
+            background: rgba(212, 160, 23, 0.1);
+        }
+
+        .file-upload-area.has-file {
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .file-upload-area input {
+            display: none;
+        }
+
+        .file-upload-text {
+            color: var(--gold-light);
+            font-size: 1.1rem;
+        }
+
+        .file-upload-text .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        /* Verification Code Display */
+        .verification-code {
+            background: rgba(0,0,0,0.6);
+            border: 3px solid var(--discord-blue);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .verification-code h3 {
+            color: var(--discord-blue);
+            margin-bottom: 10px;
+        }
+
+        .code-display {
+            font-family: monospace;
+            font-size: 2rem;
+            color: #fff;
+            background: rgba(88, 101, 242, 0.2);
+            padding: 15px 30px;
+            border-radius: 10px;
+            letter-spacing: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            user-select: all;
+        }
+
+        .discord-instructions {
+            background: rgba(88, 101, 242, 0.15);
+            border: 2px solid var(--discord-blue);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .discord-instructions code {
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .discord-instructions ol {
+            margin-left: 20px;
+            color: #ccc;
+        }
+
+        .discord-instructions li {
+            margin: 8px 0;
+        }
+
+        .status-waiting {
+            color: #facc15;
+            animation: pulse 2s infinite;
+        }
+
+        .status-approved {
+            color: #4ade80;
+        }
+
+        .status-denied {
+            color: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .btn {
@@ -102,6 +222,7 @@
             letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(212, 160, 23, 0.5);
             transition: all 0.3s;
+            margin-top: 10px;
         }
 
         .btn:hover:not(:disabled) {
@@ -114,8 +235,14 @@
             cursor: not-allowed;
         }
 
-        .btn.btn-danger {
-            background: linear-gradient(180deg, #ff6b6b 0%, #ee5a5a 50%, #cc4444 100%);
+        .btn.btn-discord {
+            background: linear-gradient(180deg, #7289da 0%, #5865F2 50%, #4752c4 100%);
+            color: white;
+        }
+
+        .btn.btn-secondary {
+            background: linear-gradient(180deg, #666 0%, #444 50%, #333 100%);
+            color: white;
         }
 
         /* Header Info */
@@ -268,9 +395,20 @@
             animation: race-pulse 1s infinite alternate;
         }
 
+        /* Pending verification */
+        .bingo-cell.pending .cell-back {
+            border-color: var(--discord-blue);
+            animation: pending-pulse 1.5s infinite alternate;
+        }
+
         @keyframes race-pulse {
             0% { box-shadow: inset 0 0 30px rgba(160, 32, 160, 0.5), 0 0 20px rgba(255, 107, 53, 0.5); }
             100% { box-shadow: inset 0 0 30px rgba(160, 32, 160, 0.5), 0 0 40px rgba(255, 107, 53, 0.9); }
+        }
+
+        @keyframes pending-pulse {
+            0% { box-shadow: inset 0 0 30px rgba(88, 101, 242, 0.3), 0 0 20px rgba(88, 101, 242, 0.5); }
+            100% { box-shadow: inset 0 0 30px rgba(88, 101, 242, 0.5), 0 0 40px rgba(88, 101, 242, 0.9); }
         }
 
         .item-image {
@@ -327,6 +465,36 @@
         .bingo-cell.claimed .claimed-mark {
             opacity: 1;
             transform: scale(1);
+        }
+
+        /* Pending indicator */
+        .pending-mark {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            width: 25%;
+            height: 25%;
+            background: linear-gradient(135deg, #7289da, #5865F2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.5vw, 1rem);
+            color: white;
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.7);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .bingo-cell.pending .pending-mark {
+            opacity: 1;
+            transform: scale(1);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: scale(1) rotate(360deg); }
         }
 
         /* Owner indicator */
@@ -503,21 +671,10 @@
             opacity: 1;
         }
 
-        .toast.error {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-
-        .toast.success {
-            border-color: #4ade80;
-            color: #4ade80;
-        }
-
-        .toast.race {
-            border-color: #ff6b35;
-            color: #ff6b35;
-        }
-
+        .toast.error { border-color: #ef4444; color: #ef4444; }
+        .toast.success { border-color: #4ade80; color: #4ade80; }
+        .toast.race { border-color: #ff6b35; color: #ff6b35; }
+        .toast.discord { border-color: var(--discord-blue); color: var(--discord-blue); }
         .toast.winner {
             border-color: #ffd700;
             color: #ffd700;
@@ -547,16 +704,13 @@
             display: none;
         }
 
-        .winner-banner.show {
-            display: block;
-        }
+        .winner-banner.show { display: block; }
 
         @keyframes banner-pulse {
             0% { background: linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.2) 50%, transparent 100%); }
             100% { background: linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.5) 50%, transparent 100%); }
         }
 
-        /* Rules text */
         .rules-text {
             color: #aaa;
             font-size: 0.85rem;
@@ -567,15 +721,8 @@
 
         /* Responsive */
         @media (max-width: 900px) {
-            .game-wrapper {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .side-panel {
-                width: 100%;
-                max-width: 500px;
-            }
+            .game-wrapper { flex-direction: column; align-items: center; }
+            .side-panel { width: 100%; max-width: 500px; }
         }
     </style>
 </head>
@@ -590,8 +737,62 @@
             <p class="rules-text" style="margin-top: 20px;">
                 🏃 RACE MODE: One tile at a time!<br>
                 Both players hunt the same drop.<br>
-                First to get it claims the tile!
+                First to get verified wins the tile!
             </p>
+        </div>
+    </div>
+
+    <!-- Verification Modal -->
+    <div class="modal-overlay hidden" id="verifyModal">
+        <div class="modal">
+            <h2>📸 Verify Your Drop!</h2>
+            <div id="verifyStep1">
+                <p>Upload a screenshot of your drop, then use the code in Discord to get verified by staff.</p>
+                
+                <div class="task-item" id="verifyItemDisplay">
+                    <!-- Item info will be inserted here -->
+                </div>
+
+                <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('screenshotInput').click()">
+                    <input type="file" id="screenshotInput" accept="image/*" onchange="handleFileSelect(event)">
+                    <div class="file-upload-text">
+                        <span class="icon">📸</span>
+                        <span id="fileUploadText">Click to upload screenshot</span>
+                    </div>
+                    <img id="previewImage" class="preview-image" style="display:none;">
+                </div>
+
+                <button class="btn btn-discord" onclick="submitVerification()" id="submitVerifyBtn" disabled>
+                    🎮 Get Verification Code
+                </button>
+                <button class="btn btn-secondary" onclick="closeVerifyModal()" style="margin-top: 10px;">
+                    Cancel
+                </button>
+            </div>
+
+            <div id="verifyStep2" style="display: none;">
+                <div class="verification-code">
+                    <h3>Your Verification Code</h3>
+                    <div class="code-display" id="verificationCodeDisplay">------</div>
+                </div>
+
+                <div class="discord-instructions">
+                    <p><strong>Go to Discord and type:</strong></p>
+                    <code id="discordCommand">!race XXXXXX</code>
+                    <ol>
+                        <li>Go to the verification channel</li>
+                        <li>Type the command above</li>
+                        <li>Attach your screenshot</li>
+                        <li>Wait for staff to approve ✅</li>
+                    </ol>
+                </div>
+
+                <p class="status-waiting" id="verificationStatus">⏳ Waiting for staff verification...</p>
+                
+                <button class="btn btn-secondary" onclick="cancelVerification()">
+                    Cancel Verification
+                </button>
+            </div>
         </div>
     </div>
 
@@ -626,9 +827,7 @@
     <div class="game-wrapper">
         <!-- Scratch Card -->
         <div class="scratch-card" id="scratchCard">
-            <div class="bingo-grid" id="bingoGrid">
-                <!-- Cells generated by JS -->
-            </div>
+            <div class="bingo-grid" id="bingoGrid"></div>
         </div>
 
         <!-- Side Panel -->
@@ -638,12 +837,11 @@
                 <div class="task-content" id="currentTask">
                     <div class="task-empty">Click a medallion to start the race!</div>
                 </div>
-                <button class="btn" id="claimBtn" onclick="claimSquare()" disabled>
-                    🏃 I Got It First!
+                <button class="btn" id="claimBtn" onclick="openVerifyModal()" disabled>
+                    📸 I Got The Drop!
                 </button>
                 <p class="rules-text">
-                    Race your opponent to get the drop!<br>
-                    First one to claim it wins the tile.
+                    Upload screenshot proof and get<br>verified by staff on Discord!
                 </p>
             </div>
 
@@ -661,6 +859,7 @@
     <script>
         // ============ CONFIGURATION ============
         const API_BASE = 'https://api.mercenarypvm.co.uk/api';
+        const VERIFY_API = 'https://api.mercenarypvm.co.uk'; // Verification bot API
         
         // ============ GAME STATE ============
         let state = {
@@ -669,16 +868,17 @@
             board: [],
             players: [],
             winner: null,
-            activeSquare: null // The current racing tile (shared for all)
+            activeSquare: null,
+            currentVerification: null,
+            selectedFile: null
         };
 
-        // ============ OSRS WIKI IMAGE HELPER ============
+        // ============ HELPERS ============
         function getItemImage(itemName) {
             const formatted = itemName.replace(/ /g, '_').replace(/'/g, '%27');
             return `https://oldschool.runescape.wiki/images/${formatted}_detail.png`;
         }
 
-        // ============ TOAST ============
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -703,13 +903,9 @@
                     body: JSON.stringify({ roomId, ign })
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error || 'Failed to join');
-                }
+                if (!res.ok) throw new Error((await res.json()).error || 'Failed to join');
 
                 const room = await res.json();
-                
                 state.roomId = roomId;
                 state.ign = ign;
                 state.board = room.board;
@@ -724,19 +920,14 @@
                 updatePlayers();
                 startPolling();
 
-                if (state.winner) {
-                    showWinner(state.winner);
-                }
-
+                if (state.winner) showWinner(state.winner);
                 showToast(`Joined room: ${roomId}`, 'success');
 
             } catch (err) {
-                console.error(err);
                 showToast(err.message || 'Connection failed!', 'error');
             }
         }
 
-        // Enter key support
         document.getElementById('ignInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') joinGame();
         });
@@ -749,25 +940,25 @@
             const grid = document.getElementById('bingoGrid');
             grid.innerHTML = '';
 
-            // Find the active racing tile (revealed but not claimed) - SHARED FOR ALL
-            const activeSquare = state.board.find(s => s.revealed && !s.claimed);
-            state.activeSquare = activeSquare ? activeSquare.id : null;
+            const activeSquare = state.board.find(s => s.revealed && !s.claimed && !s.pendingVerification);
+            const pendingSquare = state.board.find(s => s.revealed && !s.claimed && s.pendingVerification);
+            state.activeSquare = activeSquare ? activeSquare.id : (pendingSquare ? pendingSquare.id : null);
 
-            state.board.forEach((square, i) => {
+            state.board.forEach((square) => {
                 const cell = document.createElement('div');
                 cell.className = 'bingo-cell';
                 cell.dataset.id = square.id;
 
                 const isRevealed = square.revealed;
                 const isClaimed = square.claimed;
-                const isActiveRace = state.activeSquare === square.id;
+                const isPending = square.pendingVerification;
+                const isActiveRace = state.activeSquare === square.id && !isPending;
                 const hasActiveRace = state.activeSquare !== null;
 
                 if (isRevealed) cell.classList.add('flipped', 'revealed');
                 if (isClaimed) cell.classList.add('claimed');
+                if (isPending) cell.classList.add('pending');
                 if (isActiveRace) cell.classList.add('active-race');
-                
-                // Disable unrevealed tiles if there's an active race
                 if (!isRevealed && hasActiveRace) cell.classList.add('disabled');
 
                 cell.innerHTML = `
@@ -781,12 +972,13 @@
                             <div class="boss-name">${square.boss}</div>
                             <div class="rarity">${square.rarity}</div>
                             ${square.claimedBy ? `<div class="owner-badge">${square.claimedBy}</div>` : ''}
+                            ${isPending ? `<div class="owner-badge" style="border-color: var(--discord-blue);">Verifying: ${square.pendingBy}</div>` : ''}
                             <div class="claimed-mark">✓</div>
+                            <div class="pending-mark">⏳</div>
                         </div>
                     </div>
                 `;
 
-                // Click handler - only for unrevealed tiles when no active race
                 if (!isRevealed && !hasActiveRace) {
                     cell.addEventListener('click', () => revealSquare(square.id));
                 }
@@ -811,10 +1003,7 @@
                     body: JSON.stringify({ squareId, ign: state.ign })
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error || 'Failed to reveal');
-                }
+                if (!res.ok) throw new Error((await res.json()).error || 'Failed to reveal');
 
                 const room = await res.json();
                 state.board = room.board;
@@ -827,91 +1016,244 @@
                 showToast(`🏃 RACE! Get ${square.item} from ${square.boss}!`, 'race');
 
             } catch (err) {
-                console.error(err);
                 showToast(err.message || 'Failed to reveal!', 'error');
             }
         }
 
-        // ============ CLAIM SQUARE ============
-        async function claimSquare() {
+        // ============ VERIFICATION MODAL ============
+        function openVerifyModal() {
             if (state.activeSquare === null) return;
 
+            const square = state.board.find(s => s.id === state.activeSquare);
+            if (!square) return;
+
+            document.getElementById('verifyItemDisplay').innerHTML = `
+                <img src="${getItemImage(square.item)}" alt="${square.item}"
+                     onerror="this.src='https://oldschool.runescape.wiki/images/Bank_filler.png'"
+                     style="width: 60px; height: 60px;">
+                <div class="task-item-name">${square.item}</div>
+                <div class="task-boss">From: ${square.boss}</div>
+            `;
+
+            document.getElementById('verifyStep1').style.display = 'block';
+            document.getElementById('verifyStep2').style.display = 'none';
+            document.getElementById('verifyModal').classList.remove('hidden');
+            
+            // Reset file upload
+            state.selectedFile = null;
+            document.getElementById('fileUploadArea').classList.remove('has-file');
+            document.getElementById('fileUploadText').textContent = 'Click to upload screenshot';
+            document.getElementById('previewImage').style.display = 'none';
+            document.getElementById('submitVerifyBtn').disabled = true;
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.add('hidden');
+            state.currentVerification = null;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            state.selectedFile = file;
+            document.getElementById('fileUploadArea').classList.add('has-file');
+            document.getElementById('fileUploadText').textContent = file.name;
+            document.getElementById('submitVerifyBtn').disabled = false;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('previewImage');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitVerification() {
+            if (!state.selectedFile || state.activeSquare === null) return;
+
+            const square = state.board.find(s => s.id === state.activeSquare);
+            if (!square) return;
+
             try {
-                const res = await fetch(`${API_BASE}/room/${state.roomId}/claim`, {
+                const formData = new FormData();
+                formData.append('screenshot', state.selectedFile);
+                formData.append('roomId', state.roomId);
+                formData.append('squareId', state.activeSquare);
+                formData.append('ign', state.ign);
+                formData.append('item', square.item);
+                formData.append('boss', square.boss);
+                formData.append('rarity', square.rarity);
+
+                const res = await fetch(`${VERIFY_API}/verification/create`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ squareId: state.activeSquare, ign: state.ign })
+                    body: formData
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error || 'Failed to claim');
-                }
+                if (!res.ok) throw new Error('Failed to create verification');
 
+                const data = await res.json();
+                state.currentVerification = data.verificationId;
+
+                // Show step 2
+                document.getElementById('verifyStep1').style.display = 'none';
+                document.getElementById('verifyStep2').style.display = 'block';
+                document.getElementById('verificationCodeDisplay').textContent = data.verificationId;
+                document.getElementById('discordCommand').textContent = `!race ${data.verificationId}`;
+
+                showToast('Verification created! Now go to Discord.', 'discord');
+
+                // Start polling for verification status
+                pollVerificationStatus(data.verificationId);
+
+            } catch (err) {
+                showToast(err.message || 'Failed to submit!', 'error');
+            }
+        }
+
+        async function pollVerificationStatus(verificationId) {
+            const poll = async () => {
+                if (!state.currentVerification || state.currentVerification !== verificationId) return;
+
+                try {
+                    const res = await fetch(`${VERIFY_API}/verification/${verificationId}`);
+                    if (!res.ok) return;
+
+                    const data = await res.json();
+                    const statusEl = document.getElementById('verificationStatus');
+
+                    if (data.status === 'approved') {
+                        statusEl.className = 'status-approved';
+                        statusEl.textContent = '✅ APPROVED! Claiming tile...';
+                        
+                        // Confirm the claim
+                        await confirmClaim(verificationId);
+                        
+                        setTimeout(() => {
+                            closeVerifyModal();
+                            showToast('🏆 Drop verified! Tile is yours!', 'success');
+                        }, 1500);
+                        return;
+
+                    } else if (data.status === 'denied') {
+                        statusEl.className = 'status-denied';
+                        statusEl.textContent = '❌ DENIED - Staff rejected verification';
+                        
+                        // Cancel the claim
+                        await cancelClaimOnServer(verificationId);
+                        
+                        setTimeout(() => {
+                            closeVerifyModal();
+                            showToast('Verification denied. Try again with better proof.', 'error');
+                        }, 2000);
+                        return;
+                    }
+
+                    // Keep polling
+                    setTimeout(poll, 2000);
+
+                } catch (err) {
+                    setTimeout(poll, 3000);
+                }
+            };
+
+            poll();
+        }
+
+        async function confirmClaim(verificationId) {
+            try {
+                await fetch(`${API_BASE}/room/${state.roomId}/confirm-claim`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        squareId: state.activeSquare,
+                        verificationId
+                    })
+                });
+
+                // Refresh room
+                const res = await fetch(`${API_BASE}/room/${state.roomId}`);
                 const room = await res.json();
                 state.board = room.board;
                 state.players = room.players;
                 state.winner = room.winner;
-
                 renderBoard();
                 updatePlayers();
 
-                if (state.winner) {
-                    showWinner(state.winner);
-                } else {
-                    showToast('🏆 You won the race! Pick the next tile!', 'success');
-                }
+                if (state.winner) showWinner(state.winner);
 
             } catch (err) {
-                console.error(err);
-                showToast(err.message || 'Failed to claim!', 'error');
+                console.error('Confirm claim error:', err);
             }
         }
 
-        // ============ UPDATE CURRENT TASK ============
+        async function cancelClaimOnServer(verificationId) {
+            try {
+                await fetch(`${API_BASE}/room/${state.roomId}/cancel-claim`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        squareId: state.activeSquare,
+                        verificationId
+                    })
+                });
+            } catch (err) {
+                console.error('Cancel claim error:', err);
+            }
+        }
+
+        function cancelVerification() {
+            if (state.currentVerification) {
+                cancelClaimOnServer(state.currentVerification);
+            }
+            state.currentVerification = null;
+            closeVerifyModal();
+        }
+
+        // ============ UPDATE UI ============
         function updateCurrentTask() {
             const taskDiv = document.getElementById('currentTask');
             const claimBtn = document.getElementById('claimBtn');
 
-            if (state.activeSquare === null) {
+            // Find active or pending square
+            const activeSquare = state.board.find(s => s.revealed && !s.claimed);
+            
+            if (!activeSquare) {
                 taskDiv.innerHTML = '<div class="task-empty">Click a medallion to start the race!</div>';
                 claimBtn.disabled = true;
                 return;
             }
 
-            const square = state.board.find(s => s.id === state.activeSquare);
-            if (!square) return;
+            const isPending = activeSquare.pendingVerification;
 
             taskDiv.innerHTML = `
-                <div class="race-banner">
-                    <div class="race-banner-text">🏃 RACE IN PROGRESS 🏃</div>
+                <div class="race-banner" style="${isPending ? 'background: linear-gradient(135deg, #5865F2 0%, #4752c4 100%);' : ''}">
+                    <div class="race-banner-text">${isPending ? '⏳ VERIFICATION IN PROGRESS' : '🏃 RACE IN PROGRESS 🏃'}</div>
                 </div>
-                <div class="task-item racing">
-                    <img src="${getItemImage(square.item)}" 
-                         alt="${square.item}"
+                <div class="task-item ${isPending ? '' : 'racing'}">
+                    <img src="${getItemImage(activeSquare.item)}" alt="${activeSquare.item}"
                          onerror="this.src='https://oldschool.runescape.wiki/images/Bank_filler.png'">
-                    <div class="task-item-name">${square.item}</div>
-                    <div class="task-boss">From: ${square.boss}</div>
-                    <div class="task-rarity">${square.rarity}</div>
+                    <div class="task-item-name">${activeSquare.item}</div>
+                    <div class="task-boss">From: ${activeSquare.boss}</div>
+                    <div class="task-rarity">${activeSquare.rarity}</div>
+                    ${isPending ? `<div style="color: var(--discord-blue); margin-top: 10px;">Waiting on: ${activeSquare.pendingBy}</div>` : ''}
                 </div>
             `;
-            claimBtn.disabled = false;
+            
+            claimBtn.disabled = isPending;
         }
 
-        // ============ UPDATE PLAYERS ============
         function updatePlayers() {
             const list = document.getElementById('playersList');
             document.getElementById('playerCount').textContent = state.players.length;
 
-            // Count claims per player
             const claims = {};
             state.board.forEach(s => {
-                if (s.claimedBy) {
-                    claims[s.claimedBy] = (claims[s.claimedBy] || 0) + 1;
-                }
+                if (s.claimedBy) claims[s.claimedBy] = (claims[s.claimedBy] || 0) + 1;
             });
 
-            // Sort by claims
             const sorted = [...state.players].sort((a, b) => (claims[b] || 0) - (claims[a] || 0));
 
             list.innerHTML = sorted.map((p, i) => `
@@ -922,7 +1264,6 @@
             `).join('');
         }
 
-        // ============ SHOW WINNER ============
         function showWinner(winner) {
             const banner = document.getElementById('winnerBanner');
             banner.textContent = `🏆 ${winner} WINS! 🏆`;
@@ -932,9 +1273,7 @@
 
         // ============ RESET GAME ============
         async function resetGame() {
-            if (!state.roomId) return;
-            
-            if (!confirm('Start a new game with a fresh board?')) return;
+            if (!state.roomId || !confirm('Start a new game with a fresh board?')) return;
 
             try {
                 const res = await fetch(`${API_BASE}/room/${state.roomId}/reset`, {
@@ -955,7 +1294,6 @@
                 showToast('New board generated!', 'success');
 
             } catch (err) {
-                console.error(err);
                 showToast('Failed to reset!', 'error');
             }
         }
@@ -973,33 +1311,15 @@
                     
                     const boardChanged = JSON.stringify(room.board) !== JSON.stringify(state.board);
                     const playersChanged = JSON.stringify(room.players) !== JSON.stringify(state.players);
-                    const winnerChanged = room.winner !== state.winner;
 
                     if (boardChanged || playersChanged) {
-                        // Check if someone else claimed the active tile
-                        const oldActive = state.board.find(s => s.revealed && !s.claimed);
-                        const newActive = room.board.find(s => s.revealed && !s.claimed);
-                        
-                        if (oldActive && !newActive) {
-                            // Someone claimed it!
-                            const claimed = room.board.find(s => s.id === oldActive.id);
-                            if (claimed && claimed.claimedBy !== state.ign) {
-                                showToast(`${claimed.claimedBy} won the race!`, 'race');
-                            }
-                        }
-
-                        // Check if a new tile was revealed
-                        if (!oldActive && newActive) {
-                            showToast(`🏃 New race! Get ${newActive.item}!`, 'race');
-                        }
-
                         state.board = room.board;
                         state.players = room.players;
                         renderBoard();
                         updatePlayers();
                     }
 
-                    if (winnerChanged && room.winner) {
+                    if (room.winner && room.winner !== state.winner) {
                         state.winner = room.winner;
                         showWinner(room.winner);
                     }
@@ -1007,7 +1327,7 @@
                 } catch (err) {
                     console.error('Poll error:', err);
                 }
-            }, 1500); // Poll every 1.5 seconds for faster race updates
+            }, 2000);
         }
     </script>
 </body>
