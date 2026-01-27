@@ -745,24 +745,16 @@
     <!-- Verification Modal -->
     <div class="modal-overlay hidden" id="verifyModal">
         <div class="modal">
-            <h2>📸 Verify Your Drop!</h2>
+            <h2>🎮 Verify Your Drop!</h2>
+            
             <div id="verifyStep1">
-                <p>Upload a screenshot of your drop, then use the code in Discord to get verified by staff.</p>
-                
                 <div class="task-item" id="verifyItemDisplay">
                     <!-- Item info will be inserted here -->
                 </div>
 
-                <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('screenshotInput').click()">
-                    <input type="file" id="screenshotInput" accept="image/*" onchange="handleFileSelect(event)">
-                    <div class="file-upload-text">
-                        <span class="icon">📸</span>
-                        <span id="fileUploadText">Click to upload screenshot</span>
-                    </div>
-                    <img id="previewImage" class="preview-image" style="display:none;">
-                </div>
+                <p style="color: #ccc; margin: 15px 0;">Click below to get your verification code, then submit proof in Discord!</p>
 
-                <button class="btn btn-discord" onclick="submitVerification()" id="submitVerifyBtn" disabled>
+                <button class="btn btn-discord" onclick="submitVerification()" id="submitVerifyBtn">
                     🎮 Get Verification Code
                 </button>
                 <button class="btn btn-secondary" onclick="closeVerifyModal()" style="margin-top: 10px;">
@@ -782,7 +774,7 @@
                     <ol>
                         <li>Go to the verification channel</li>
                         <li>Type the command above</li>
-                        <li>Attach your screenshot</li>
+                        <li>Attach your screenshot of the drop</li>
                         <li>Wait for staff to approve ✅</li>
                     </ol>
                 </div>
@@ -1038,13 +1030,6 @@
             document.getElementById('verifyStep1').style.display = 'block';
             document.getElementById('verifyStep2').style.display = 'none';
             document.getElementById('verifyModal').classList.remove('hidden');
-            
-            // Reset file upload
-            state.selectedFile = null;
-            document.getElementById('fileUploadArea').classList.remove('has-file');
-            document.getElementById('fileUploadText').textContent = 'Click to upload screenshot';
-            document.getElementById('previewImage').style.display = 'none';
-            document.getElementById('submitVerifyBtn').disabled = true;
         }
 
         function closeVerifyModal() {
@@ -1072,24 +1057,23 @@
         }
 
         async function submitVerification() {
-            if (!state.selectedFile || state.activeSquare === null) return;
+            if (state.activeSquare === null) return;
 
             const square = state.board.find(s => s.id === state.activeSquare);
             if (!square) return;
 
             try {
-                const formData = new FormData();
-                formData.append('screenshot', state.selectedFile);
-                formData.append('roomId', state.roomId);
-                formData.append('squareId', state.activeSquare);
-                formData.append('ign', state.ign);
-                formData.append('item', square.item);
-                formData.append('boss', square.boss);
-                formData.append('rarity', square.rarity);
-
                 const res = await fetch(`${VERIFY_API}/verification/create`, {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomId: state.roomId,
+                        squareId: state.activeSquare,
+                        ign: state.ign,
+                        item: square.item,
+                        boss: square.boss,
+                        rarity: square.rarity
+                    })
                 });
 
                 if (!res.ok) throw new Error('Failed to create verification');
@@ -1103,7 +1087,7 @@
                 document.getElementById('verificationCodeDisplay').textContent = data.verificationId;
                 document.getElementById('discordCommand').textContent = `!race ${data.verificationId}`;
 
-                showToast('Verification created! Now go to Discord.', 'discord');
+                showToast('Code generated! Now go to Discord.', 'discord');
 
                 // Start polling for verification status
                 pollVerificationStatus(data.verificationId);
