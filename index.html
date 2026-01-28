@@ -321,6 +321,11 @@
             padding: 1%;
         }
 
+        .bingo-grid.grid-5 {
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+        }
+
         /* Individual Cell */
         .bingo-cell {
             position: relative;
@@ -727,18 +732,48 @@
     </style>
 </head>
 <body>
-    <!-- Join Modal -->
+    <!-- Lobby Modal -->
     <div class="modal-overlay" id="joinModal">
         <div class="modal">
             <h2>⚔️ OSRS Boss Bingo ⚔️</h2>
-            <input type="text" id="roomInput" placeholder="Room Code" maxlength="20">
-            <input type="text" id="ignInput" placeholder="Your RSN (In-Game Name)" maxlength="12">
-            <button class="btn" onclick="joinGame()">Join Game</button>
-            <p class="rules-text" style="margin-top: 20px;">
-                🏃 RACE MODE: One tile at a time!<br>
-                Both players hunt the same drop.<br>
-                First to get verified wins the tile!
-            </p>
+            
+            <!-- Lobby View -->
+            <div id="lobbyView">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <button class="btn" onclick="showJoinRoom()" style="flex: 1;">Join Room</button>
+                    <button class="btn" onclick="showCreateRoom()" style="flex: 1; background: linear-gradient(180deg, #4ade80 0%, #22c55e 50%, #16a34a 100%); color: white;">Create Room</button>
+                </div>
+                <p class="rules-text">
+                    🏃 RACE MODE: One tile at a time!<br>
+                    Both players hunt the same drop.<br>
+                    First to get verified wins the tile!
+                </p>
+            </div>
+
+            <!-- Join Room View -->
+            <div id="joinRoomView" style="display: none;">
+                <button onclick="showLobby()" style="background: none; border: none; color: var(--gold); cursor: pointer; margin-bottom: 15px;">← Back</button>
+                <input type="text" id="roomInput" placeholder="Room Code" maxlength="30">
+                <input type="password" id="passwordInput" placeholder="Room Password (if required)" style="display: none;">
+                <input type="text" id="ignInput" placeholder="Your RSN (In-Game Name)" maxlength="12">
+                <button class="btn" onclick="joinGame()">Join Room</button>
+            </div>
+
+            <!-- Create Room View -->
+            <div id="createRoomView" style="display: none;">
+                <button onclick="showLobby()" style="background: none; border: none; color: var(--gold); cursor: pointer; margin-bottom: 15px;">← Back</button>
+                <input type="text" id="createRoomId" placeholder="Room Code (e.g., my-room)" maxlength="30">
+                <input type="password" id="createPassword" placeholder="Password (optional)">
+                <div style="margin: 15px 0;">
+                    <label style="color: var(--gold-light); display: block; margin-bottom: 8px;">Board Size</label>
+                    <select id="createBoardSize" style="width: 100%; padding: 12px; font-family: 'Pirata One', cursive; font-size: 1.1rem; background: rgba(0,0,0,0.6); border: 2px solid var(--gold); border-radius: 8px; color: var(--gold-light);">
+                        <option value="3">3x3 (9 tiles)</option>
+                        <option value="5">5x5 (25 tiles)</option>
+                    </select>
+                </div>
+                <input type="text" id="createIgn" placeholder="Your RSN (In-Game Name)" maxlength="12">
+                <button class="btn" onclick="createAndJoinRoom()" style="background: linear-gradient(180deg, #4ade80 0%, #22c55e 50%, #16a34a 100%); color: white;">Create & Join</button>
+            </div>
         </div>
     </div>
 
@@ -862,7 +897,8 @@
             winner: null,
             activeSquare: null,
             currentVerification: null,
-            selectedFile: null
+            selectedFile: null,
+            boardSize: 3
         };
 
         // ============ HELPERS ============
@@ -878,10 +914,51 @@
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
+        // ============ LOBBY NAVIGATION ============
+        function showLobby() {
+            document.getElementById('lobbyView').style.display = 'block';
+            document.getElementById('joinRoomView').style.display = 'none';
+            document.getElementById('createRoomView').style.display = 'none';
+        }
+
+        function showJoinRoom() {
+            document.getElementById('lobbyView').style.display = 'none';
+            document.getElementById('joinRoomView').style.display = 'block';
+            document.getElementById('createRoomView').style.display = 'none';
+        }
+
+        function showCreateRoom() {
+            document.getElementById('lobbyView').style.display = 'none';
+            document.getElementById('joinRoomView').style.display = 'none';
+            document.getElementById('createRoomView').style.display = 'block';
+        }
+
+        // ============ CHECK IF ROOM NEEDS PASSWORD ============
+        async function checkRoomPassword() {
+            const roomId = document.getElementById('roomInput').value.trim().toLowerCase();
+            if (!roomId) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/room/${roomId}/exists`);
+                const data = await res.json();
+                
+                if (data.exists && data.hasPassword) {
+                    document.getElementById('passwordInput').style.display = 'block';
+                } else {
+                    document.getElementById('passwordInput').style.display = 'none';
+                }
+            } catch (err) {
+                // Ignore
+            }
+        }
+
+        document.getElementById('roomInput')?.addEventListener('blur', checkRoomPassword);
+
         // ============ JOIN GAME ============
         async function joinGame() {
             const roomId = document.getElementById('roomInput').value.trim().toLowerCase();
             const ign = document.getElementById('ignInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
 
             if (!roomId || !ign) {
                 showToast('Enter both Room Code and RSN!', 'error');
@@ -892,39 +969,96 @@
                 const res = await fetch(`${API_BASE}/room/join`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ roomId, ign })
+                    body: JSON.stringify({ roomId, ign, password, createNew: false })
                 });
 
-                if (!res.ok) throw new Error((await res.json()).error || 'Failed to join');
+                const data = await res.json();
 
-                const room = await res.json();
-                state.roomId = roomId;
-                state.ign = ign;
-                state.board = room.board;
-                state.players = room.players;
-                state.winner = room.winner;
+                if (!res.ok) {
+                    if (data.needsPassword) {
+                        document.getElementById('passwordInput').style.display = 'block';
+                        showToast('This room requires a password!', 'error');
+                        return;
+                    }
+                    throw new Error(data.error || 'Failed to join');
+                }
 
-                document.getElementById('joinModal').classList.add('hidden');
-                document.getElementById('roomDisplay').textContent = roomId;
-                document.getElementById('playerDisplay').textContent = ign;
-
-                renderBoard();
-                updatePlayers();
-                startPolling();
-
-                if (state.winner) showWinner(state.winner);
-                showToast(`Joined room: ${roomId}`, 'success');
+                initializeGame(data, roomId, ign);
 
             } catch (err) {
                 showToast(err.message || 'Connection failed!', 'error');
             }
         }
 
-        document.getElementById('ignInput').addEventListener('keypress', (e) => {
+        // ============ CREATE AND JOIN ROOM ============
+        async function createAndJoinRoom() {
+            const roomId = document.getElementById('createRoomId').value.trim().toLowerCase();
+            const ign = document.getElementById('createIgn').value.trim();
+            const password = document.getElementById('createPassword').value;
+            const boardSize = parseInt(document.getElementById('createBoardSize').value);
+
+            if (!roomId || !ign) {
+                showToast('Enter both Room Code and RSN!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/room/join`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomId, ign, password, boardSize })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to create room');
+                }
+
+                initializeGame(data, roomId, ign);
+
+            } catch (err) {
+                showToast(err.message || 'Connection failed!', 'error');
+            }
+        }
+
+        // ============ INITIALIZE GAME ============
+        function initializeGame(room, roomId, ign) {
+            state.roomId = roomId;
+            state.ign = ign;
+            state.board = room.board;
+            state.players = room.players;
+            state.winner = room.winner;
+            state.boardSize = room.boardSize || 3;
+
+            document.getElementById('joinModal').classList.add('hidden');
+            document.getElementById('roomDisplay').textContent = roomId;
+            document.getElementById('playerDisplay').textContent = ign;
+
+            // Update grid CSS for board size
+            const grid = document.getElementById('bingoGrid');
+            if (state.boardSize === 5) {
+                grid.classList.add('grid-5');
+            } else {
+                grid.classList.remove('grid-5');
+            }
+
+            renderBoard();
+            updatePlayers();
+            startPolling();
+
+            if (state.winner) showWinner(state.winner);
+            showToast(`Joined room: ${roomId} (${state.boardSize}x${state.boardSize})`, 'success');
+        }
+
+        document.getElementById('ignInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') joinGame();
         });
-        document.getElementById('roomInput').addEventListener('keypress', (e) => {
+        document.getElementById('roomInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') document.getElementById('ignInput').focus();
+        });
+        document.getElementById('createIgn')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') createAndJoinRoom();
         });
 
         // ============ RENDER BOARD ============
