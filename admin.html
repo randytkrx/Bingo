@@ -41,6 +41,7 @@
             align-items: center; justify-content: center;
             font-size: 0.6rem; text-align: center;
             cursor: pointer; transition: all 0.2s;
+            position: relative;
         }
         .tile-preview:hover { border-color: #e6a919; transform: scale(1.05); }
         .tile-preview.selected { border-color: #e6a919; box-shadow: 0 0 10px rgba(230, 169, 25, 0.3); }
@@ -115,6 +116,8 @@
             const [tileItem, setTileItem] = useState('');
             const [tileBoss, setTileBoss] = useState('');
             const [tileImage, setTileImage] = useState('');
+            const [tilePoints, setTilePoints] = useState(1);
+            const [revealAllAtStart, setRevealAllAtStart] = useState(false);
             
             // Background state
             const [cardBackground, setCardBackground] = useState('');
@@ -205,7 +208,8 @@
                         cardBackground: cardBackground || null,
                         starImage: starImage || null,
                         teamMode,
-                        teams: teamMode ? teams : null
+                        teams: teamMode ? teams : null,
+                        revealAllAtStart
                     };
 
                     const res = await fetch(`${API_BASE}/admin/room/create`, {
@@ -258,12 +262,13 @@
                 setTileItem(tile?.item || '');
                 setTileBoss(tile?.boss || '');
                 setTileImage(tile?.customImage || '');
+                setTilePoints(tile?.points || 1);
             };
 
             const saveTile = () => {
                 if (selectedTile === null) return;
                 const newTiles = [...customTiles];
-                newTiles[selectedTile] = { item: tileItem, boss: tileBoss, customImage: tileImage };
+                newTiles[selectedTile] = { item: tileItem, boss: tileBoss, customImage: tileImage, points: parseInt(tilePoints) || 1 };
                 setCustomTiles(newTiles);
             };
 
@@ -442,6 +447,10 @@
                                             <input type="checkbox" checked={requireVerification} onChange={(e) => setRequireVerification(e.target.checked)} className="accent-merc-accent" />
                                             <span>✅ Require Verification</span>
                                         </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" checked={revealAllAtStart} onChange={(e) => setRevealAllAtStart(e.target.checked)} className="accent-merc-accent" />
+                                            <span>👁️ Reveal All Tiles at Start</span>
+                                        </label>
                                     </div>
                                 </div>
 
@@ -567,6 +576,11 @@
                                                     onClick={() => handleTileClick(i)}
                                                     style={tile.customImage ? { backgroundImage: `url(${tile.customImage})`, backgroundSize: 'cover' } : {}}
                                                 >
+                                                    {tile.points > 1 && (
+                                                        <div className="absolute top-1 right-1 bg-merc-green text-merc-bg text-xs font-bold px-1.5 py-0.5 rounded">
+                                                            {tile.points}pt
+                                                        </div>
+                                                    )}
                                                     {!tile.customImage && (
                                                         <>
                                                             <div className="text-merc-accent font-bold truncate w-full px-1">{tile.item}</div>
@@ -616,6 +630,19 @@
                                                                 <button onClick={() => setTileImage('')} className="text-red-400 text-sm">Remove</button>
                                                             </div>
                                                         )}
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-gray-400 text-sm block mb-1">Points Value</label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            max="100"
+                                                            value={tilePoints}
+                                                            onChange={(e) => setTilePoints(parseInt(e.target.value) || 1)}
+                                                            className="w-full rounded px-3 py-2"
+                                                            placeholder="1"
+                                                        />
+                                                        <p className="text-xs text-gray-500 mt-1">Points awarded when tile is claimed</p>
                                                     </div>
                                                     <button
                                                         onClick={saveTile}
