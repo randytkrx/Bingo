@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSRS Boss Bingo - Mercenary PvM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Pirata+One&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4a017;
+            --gold-light: #f4d03f;
+            --purple: #a020a0;
+            --dark-purple: #4a0e4a;
+            --discord-blue: #5865F2;
+            --bg: #0d0f14;
+            --card: #151821;
+            --border: #2a3042;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.hidden { display: none; }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0d0f14 100%);
+            border: 3px solid var(--gold);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-light);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 12px;
+        }
+        .modal input:focus { outline: none; border-color: var(--gold); }
+        .modal input::placeholder { color: #666; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold) 0%, #b8860b 100%);
+            color: #1a0a2e;
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(212, 160, 23, 0.4); }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            margin-top: 10px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            border-bottom: 2px solid var(--border);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold-light); }
+        .room-info { display: flex; gap: 15px; font-size: 0.9rem; }
+        .room-info span { color: #888; }
+        .room-info strong { color: var(--gold-light); }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1000px) {
+            .main-container { flex-direction: column; }
+        }
+
+        /* Board */
+        .board-container { flex: 1; }
+        .bingo-grid {
+            display: grid;
+            gap: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .bingo-cell {
+            aspect-ratio: 1;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .cell-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .bingo-cell.revealed .cell-inner { transform: rotateY(180deg); }
+        .cell-front, .cell-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5%;
+        }
+        .cell-front {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a0a2e 100%);
+            border: 3px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+        }
+        /* Custom background layer */
+        .cell-front::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--card-bg, none);
+            background-size: cover;
+            background-position: center;
+            opacity: 0.7;
+        }
+        /* Star/seal image on top */
+        .cell-front-star {
+            position: relative;
+            z-index: 1;
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(244, 208, 63, 0.6));
+        }
+        .cell-back {
+            background: linear-gradient(135deg, rgba(74, 14, 74, 0.9) 0%, rgba(26, 10, 46, 0.95) 100%);
+            border: 3px solid var(--gold);
+            transform: rotateY(180deg);
+            overflow: hidden;
+        }
+        .bingo-cell.claimed .cell-back { border-color: #22c55e; }
+        .bingo-cell.pending .cell-back { border-color: var(--discord-blue); animation: pending-pulse 1.5s infinite alternate; }
+        @keyframes pending-pulse {
+            0% { box-shadow: 0 0 10px rgba(88, 101, 242, 0.5); }
+            100% { box-shadow: 0 0 25px rgba(88, 101, 242, 0.9); }
+        }
+
+        .item-image {
+            width: 50%;
+            height: auto;
+            max-height: 40%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+        .custom-tile-image {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        .item-name {
+            color: var(--gold-light);
+            font-size: clamp(0.5rem, 1.2vw, 0.8rem);
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .boss-name {
+            color: #ff6b35;
+            font-size: clamp(0.4rem, 1vw, 0.65rem);
+            text-align: center;
+        }
+
+        /* Claimed/Pending marks */
+        .claimed-mark, .pending-mark {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            width: 22%;
+            height: 22%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.5vw, 1rem);
+            color: white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+        }
+        .claimed-mark { background: linear-gradient(135deg, #4ade80, #22c55e); }
+        .pending-mark { background: linear-gradient(135deg, #7289da, #5865F2); }
+        .bingo-cell.claimed .claimed-mark { opacity: 1; transform: scale(1); }
+        .bingo-cell.pending .pending-mark { opacity: 1; transform: scale(1); animation: spin 2s linear infinite; }
+        @keyframes spin { 100% { transform: scale(1) rotate(360deg); } }
+
+        /* Team color border for claimed tiles */
+        .team-claimed { border-width: 4px !important; }
+
+        /* Owner badge */
+        .owner-badge {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: var(--gold-light);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: clamp(0.35rem, 0.9vw, 0.55rem);
+            white-space: nowrap;
+            border: 1px solid var(--gold);
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        @media (max-width: 1000px) {
+            .side-panel { width: 100%; flex-direction: row; flex-wrap: wrap; }
+            .panel-section { flex: 1; min-width: 250px; }
+        }
+        .panel-section {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        .panel-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* Teams */
+        .team-list { display: flex; flex-direction: column; gap: 8px; }
+        .team-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .team-item:hover { transform: translateX(3px); }
+        .team-item.my-team { box-shadow: 0 0 10px currentColor; }
+        .team-name { font-weight: bold; }
+        .team-members { font-size: 0.8rem; opacity: 0.7; }
+        .team-score { font-weight: bold; font-size: 1.1rem; }
+
+        /* Players */
+        .player-list { max-height: 200px; overflow-y: auto; }
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .player-item:last-child { border-bottom: none; }
+        .player-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+        .player-name { flex: 1; }
+        .player-you { color: var(--gold-light); font-weight: bold; }
+
+        /* Winner Banner */
+        .winner-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #0d0f14 100%);
+            border: 4px solid var(--gold);
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            z-index: 999;
+            animation: winner-pop 0.5s ease-out;
+        }
+        @keyframes winner-pop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        .winner-banner.hidden { display: none; }
+        .winner-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+        .winner-name {
+            font-size: 2.5rem;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card);
+            border: 2px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.error { border-color: #ef4444; color: #fca5a5; }
+        .toast.success { border-color: #22c55e; color: #86efac; }
+
+        /* Verification Modal */
+        .verify-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .verify-modal.hidden { display: none; }
+        .verify-content {
+            background: var(--card);
+            border: 3px solid var(--discord-blue);
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .verify-content h3 { color: var(--gold-light); margin-bottom: 15px; }
+        .verify-content p { color: #aaa; margin-bottom: 15px; font-size: 0.9rem; }
+        .verify-id {
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--discord-blue);
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+        .verify-buttons { display: flex; gap: 10px; }
+        .verify-buttons button { flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-verify { background: var(--discord-blue); color: white; border: none; }
+        .btn-cancel { background: transparent; border: 2px solid #666; color: #888; }
+    </style>
+</head>
+<body>
+    <!-- Join Modal -->
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal">
+            <h2>🎲 Join Bingo Game</h2>
+            <input type="text" id="roomInput" placeholder="Room Code" autocomplete="off">
+            <input type="text" id="ignInput" placeholder="Your RSN (RuneScape Name)" autocomplete="off">
+            <input type="password" id="passwordInput" placeholder="Room Password (if required)" style="display:none">
+            <button class="btn btn-gold" onclick="joinGame()">Join Game</button>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Back to Site</button>
+        </div>
+    </div>
+
+    <!-- Team Select Modal -->
+    <div class="modal-overlay hidden" id="teamModal">
+        <div class="modal">
+            <h2>👥 Select Your Team</h2>
+            <div id="teamSelectList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;"></div>
+            <button class="btn btn-secondary" onclick="skipTeamSelect()">Play Solo</button>
+        </div>
+    </div>
+
+    <!-- Verification Modal -->
+    <div class="verify-modal hidden" id="verifyModal">
+        <div class="verify-content">
+            <h3>📸 Verification Required</h3>
+            <p>Post a screenshot in Discord with this code to claim:</p>
+            <div class="verify-id" id="verifyCode"></div>
+            <p style="font-size: 0.8rem; color: #888;">Staff will verify and confirm your claim</p>
+            <div class="verify-buttons">
+                <button class="btn-cancel" onclick="cancelVerification()">Cancel</button>
+                <button class="btn-verify" onclick="copyVerifyCode()">📋 Copy Code</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winner Banner -->
+    <div class="winner-banner hidden" id="winnerBanner">
+        <div class="winner-title">🏆 WINNER! 🏆</div>
+        <div class="winner-name" id="winnerName"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Main Game UI -->
+    <div id="gameUI" style="display: none;">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">🎲 Boss Bingo</div>
+                <div class="room-info">
+                    <span>Room: <strong id="roomDisplay"></strong></span>
+                    <span>Player: <strong id="playerDisplay"></strong></span>
+                    <span id="teamDisplay" style="display:none">Team: <strong id="myTeamDisplay"></strong></span>
+                </div>
+            </div>
+            <a href="index.html" style="color: var(--gold); text-decoration: none;">← Exit</a>
+        </header>
+
+        <div class="main-container">
+            <div class="board-container">
+                <div class="bingo-grid" id="bingoGrid"></div>
+            </div>
+
+            <div class="side-panel">
+                <!-- Teams Panel (shown in team mode) -->
+                <div class="panel-section" id="teamsPanel" style="display: none;">
+                    <div class="panel-title">👥 Teams</div>
+                    <div class="team-list" id="teamsList"></div>
+                </div>
+
+                <!-- Players Panel -->
+                <div class="panel-section">
+                    <div class="panel-title">🎮 Players (<span id="playerCount">0</span>)</div>
+                    <div class="player-list" id="playersList"></div>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="panel-section">
+                    <div class="panel-title">📋 How to Play</div>
+                    <div style="font-size: 0.85rem; color: #aaa; line-height: 1.6;">
+                        <p>1. Click a tile to reveal the drop</p>
+                        <p>2. Get the drop in-game</p>
+                        <p>3. Click to claim (may need verification)</p>
+                        <p>4. First to complete a line wins!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.mercenarypvm.co.uk/api';
+        
+        // Game State
+        const state = {
+            roomId: null,
+            ign: null,
+            board: [],
+            players: [],
+            winner: null,
+            rows: 3,
+            cols: 3,
+            teamMode: false,
+            teams: null,
+            myTeam: null,
+            cardBackground: null,
+            starImage: null,
+            requireVerification: true,
+            pendingVerification: null,
+            pendingSquareId: null
+        };
+
+        let pollInterval = null;
+
+        // ============ HELPERS ============
+        function getItemImage(itemName) {
+            const formatted = itemName.replace(/ /g, '_').replace(/'/g, '%27');
+            return `https://oldschool.runescape.wiki/images/${formatted}_detail.png`;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ============ URL PARAMS ============
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                room: params.get('room'),
+                ign: params.get('ign')
+            };
+        }
+
+        // ============ INIT ============
+        window.onload = function() {
+            const params = getUrlParams();
+            if (params.room) {
+                document.getElementById('roomInput').value = params.room;
+                checkRoomPassword();
+            }
+            if (params.ign) {
+                document.getElementById('ignInput').value = params.ign;
+            }
+        };
+
+        // ============ CHECK PASSWORD ============
+        async function checkRoomPassword() {
+            const roomId = document.getElementById('roomInput').value.trim().toLowerCase();
+            if (!roomId) return;
+            try {
+                const res = await fetch(`${API_BASE}/room/${roomId}/exists`);
+                const data = await res.json();
+                document.getElementById('passwordInput').style.display = (data.exists && data.hasPassword) ? 'block' : 'none';
+            } catch (err) {}
+        }
+        document.getElementById('roomInput').addEventListener('blur', checkRoomPassword);
+
+        // ============ JOIN GAME ============
+        async function joinGame() {
+            const roomId = document.getElementById('roomInput').value.trim().toLowerCase();
+            const ign = document.getElementById('ignInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+
+            if (!roomId || !ign) {
+                showToast('Enter both Room Code and RSN!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/room/join`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomId, ign, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    if (data.needsPassword) {
+                        document.getElementById('passwordInput').style.display = 'block';
+                        showToast('This room requires a password!', 'error');
+                        return;
+                    }
+                    throw new Error(data.error || 'Failed to join');
+                }
+
+                initializeGame(data, roomId, ign);
+
+            } catch (err) {
+                showToast(err.message || 'Connection failed!', 'error');
+            }
+        }
+
+        // ============ INITIALIZE GAME ============
+        function initializeGame(room, roomId, ign) {
+            state.roomId = roomId;
+            state.ign = ign;
+            state.board = room.board;
+            state.players = room.players || [];
+            state.winner = room.winner;
+            state.rows = room.rows || room.boardSize || 3;
+            state.cols = room.cols || room.boardSize || 3;
+            state.teamMode = room.teamMode || false;
+            state.teams = room.teams || null;
+            state.cardBackground = room.cardBackground || null;
+            state.starImage = room.starImage || null;
+            state.requireVerification = room.requireVerification !== false;
+
+            document.getElementById('joinModal').classList.add('hidden');
+            document.getElementById('gameUI').style.display = 'block';
+            document.getElementById('roomDisplay').textContent = roomId;
+            document.getElementById('playerDisplay').textContent = ign;
+
+            // Setup grid
+            const grid = document.getElementById('bingoGrid');
+            grid.style.gridTemplateColumns = `repeat(${state.cols}, 1fr)`;
+
+            // Check if team mode
+            if (state.teamMode && state.teams) {
+                // Check if player already in a team
+                const existingTeam = state.teams.find(t => t.members && t.members.includes(ign));
+                if (existingTeam) {
+                    state.myTeam = existingTeam.id;
+                    showTeamInfo();
+                } else {
+                    showTeamSelect();
+                }
+            }
+
+            renderBoard();
+            updatePlayers();
+            updateTeams();
+            startPolling();
+
+            if (state.winner) showWinner(state.winner);
+        }
+
+        // ============ TEAM SELECTION ============
+        function showTeamSelect() {
+            const list = document.getElementById('teamSelectList');
+            list.innerHTML = '';
+            
+            state.teams.forEach(team => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style.background = team.color;
+                btn.style.color = '#fff';
+                btn.style.textShadow = '1px 1px 2px rgba(0,0,0,0.5)';
+                btn.innerHTML = `${team.name} <span style="opacity:0.7">(${team.members?.length || 0} members)</span>`;
+                btn.onclick = () => joinTeam(team.id);
+                list.appendChild(btn);
+            });
+
+            document.getElementById('teamModal').classList.remove('hidden');
+        }
+
+        async function joinTeam(teamId) {
+            try {
+                const res = await fetch(`${API_BASE}/room/${state.roomId}/join-team`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ign: state.ign, teamId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    state.myTeam = teamId;
+                    state.teams = data.teams;
+                    document.getElementById('teamModal').classList.add('hidden');
+                    showTeamInfo();
+                    updateTeams();
+                    showToast('Joined team!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to join team', 'error');
+                }
+            } catch (err) {
+                showToast('Connection error', 'error');
+            }
+        }
+
+        function skipTeamSelect() {
+            document.getElementById('teamModal').classList.add('hidden');
+        }
+
+        function showTeamInfo() {
+            if (state.myTeam && state.teams) {
+                const team = state.teams.find(t => t.id === state.myTeam);
+                if (team) {
+                    document.getElementById('teamDisplay').style.display = 'inline';
+                    document.getElementById('myTeamDisplay').textContent = team.name;
+                    document.getElementById('myTeamDisplay').style.color = team.color;
+                }
+            }
+        }
+
+        // ============ RENDER BOARD ============
+        // Default star/seal image for scratch cards
+        const STAR_IMAGE = 'https://oldschool.runescape.wiki/images/Stale_baguette_detail.png'; // Placeholder - will be replaced
+
+        function renderBoard() {
+            const grid = document.getElementById('bingoGrid');
+            grid.innerHTML = '';
+
+            state.board.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.className = 'bingo-cell';
+                if (cell.revealed) div.classList.add('revealed');
+                if (cell.claimed) div.classList.add('claimed');
+                if (cell.pendingVerification) div.classList.add('pending');
+
+                // Get team color for claimed cells
+                let teamColor = null;
+                if (cell.claimedByTeam && state.teams) {
+                    const team = state.teams.find(t => t.id === cell.claimedByTeam);
+                    if (team) teamColor = team.color;
+                }
+
+                // Use custom star image if provided, otherwise default
+                const starImg = state.starImage || STAR_IMAGE;
+
+                div.innerHTML = `
+                    <div class="cell-inner">
+                        <div class="cell-front" ${state.cardBackground ? `style="--card-bg: url('${state.cardBackground}')"` : ''}>
+                            <img src="${starImg}" class="cell-front-star" onerror="this.style.display='none'">
+                        </div>
+                        <div class="cell-back ${teamColor ? 'team-claimed' : ''}" 
+                             ${teamColor ? `style="border-color: ${teamColor}"` : ''}>
+                            ${cell.customImage 
+                                ? `<img src="${cell.customImage}" class="custom-tile-image" onerror="this.style.display='none'">`
+                                : `<img src="${getItemImage(cell.item)}" class="item-image" onerror="this.style.display='none'">`
+                            }
+                            <div class="item-name">${cell.item}</div>
+                            ${cell.boss ? `<div class="boss-name">${cell.boss}</div>` : ''}
+                            <div class="claimed-mark">✓</div>
+                            <div class="pending-mark">⏳</div>
+                            ${cell.claimedBy ? `<div class="owner-badge">${cell.claimedBy}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                div.onclick = () => handleCellClick(index);
+                grid.appendChild(div);
+            });
+        }
+
+        // ============ CELL CLICK ============
+        async function handleCellClick(index) {
+            const cell = state.board[index];
+
+            if (state.winner) {
+                showToast('Game is over!', 'error');
+                return;
+            }
+
+            // Reveal
+            if (!cell.revealed) {
+                try {
+                    const res = await fetch(`${API_BASE}/room/${state.roomId}/reveal`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ squareId: index, ign: state.ign })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        updateFromServer(data);
+                    } else {
+                        showToast(data.error || 'Failed to reveal', 'error');
+                    }
+                } catch (err) {
+                    showToast('Connection error', 'error');
+                }
+                return;
+            }
+
+            // Claim
+            if (cell.revealed && !cell.claimed && !cell.pendingVerification) {
+                if (state.requireVerification) {
+                    // Generate verification ID
+                    const verificationId = 'MERC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    state.pendingVerification = verificationId;
+                    state.pendingSquareId = index;
+
+                    // Show verification modal
+                    document.getElementById('verifyCode').textContent = verificationId;
+                    document.getElementById('verifyModal').classList.remove('hidden');
+
+                    // Send to server
+                    try {
+                        await fetch(`${API_BASE}/room/${state.roomId}/claim`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                squareId: index, 
+                                ign: state.ign, 
+                                verificationId,
+                                teamId: state.myTeam
+                            })
+                        });
+                    } catch (err) {}
+                } else {
+                    // Direct claim
+                    try {
+                        const res = await fetch(`${API_BASE}/room/${state.roomId}/claim`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                squareId: index, 
+                                ign: state.ign,
+                                teamId: state.myTeam
+                            })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            updateFromServer(data);
+                            showToast('Claimed!', 'success');
+                        } else {
+                            showToast(data.error || 'Failed to claim', 'error');
+                        }
+                    } catch (err) {
+                        showToast('Connection error', 'error');
+                    }
+                }
+            }
+        }
+
+        // ============ VERIFICATION ============
+        function copyVerifyCode() {
+            const code = document.getElementById('verifyCode').textContent;
+            navigator.clipboard.writeText(code);
+            showToast('Code copied! Post in Discord with screenshot', 'success');
+        }
+
+        async function cancelVerification() {
+            if (state.pendingVerification && state.pendingSquareId !== null) {
+                try {
+                    await fetch(`${API_BASE}/room/${state.roomId}/cancel-claim`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            squareId: state.pendingSquareId, 
+                            verificationId: state.pendingVerification 
+                        })
+                    });
+                } catch (err) {}
+            }
+            state.pendingVerification = null;
+            state.pendingSquareId = null;
+            document.getElementById('verifyModal').classList.add('hidden');
+        }
+
+        // ============ UPDATE FROM SERVER ============
+        function updateFromServer(data) {
+            state.board = data.board;
+            state.players = data.players || [];
+            state.winner = data.winner;
+            state.teams = data.teams || state.teams;
+
+            renderBoard();
+            updatePlayers();
+            updateTeams();
+
+            if (state.winner && !document.getElementById('winnerBanner').classList.contains('shown')) {
+                showWinner(state.winner);
+            }
+
+            // Check if our pending verification was confirmed
+            if (state.pendingSquareId !== null) {
+                const cell = state.board[state.pendingSquareId];
+                if (cell && cell.claimed && cell.claimedBy === state.ign) {
+                    document.getElementById('verifyModal').classList.add('hidden');
+                    state.pendingVerification = null;
+                    state.pendingSquareId = null;
+                    showToast('Claim verified!', 'success');
+                }
+            }
+        }
+
+        // ============ UPDATE PLAYERS ============
+        function updatePlayers() {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+            document.getElementById('playerCount').textContent = state.players.length;
+
+            state.players.forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'player-item';
+                
+                // Get team color
+                let teamColor = '#22c55e';
+                if (state.teamMode && state.teams) {
+                    const team = state.teams.find(t => t.members && t.members.includes(player));
+                    if (team) teamColor = team.color;
+                }
+
+                div.innerHTML = `
+                    <div class="player-dot" style="background: ${teamColor}"></div>
+                    <span class="player-name ${player === state.ign ? 'player-you' : ''}">${player}${player === state.ign ? ' (You)' : ''}</span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // ============ UPDATE TEAMS ============
+        function updateTeams() {
+            if (!state.teamMode || !state.teams) {
+                document.getElementById('teamsPanel').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('teamsPanel').style.display = 'block';
+            const list = document.getElementById('teamsList');
+            list.innerHTML = '';
+
+            // Calculate scores
+            state.teams.forEach(team => {
+                const score = state.board.filter(c => c.claimedByTeam === team.id).length;
+                
+                const div = document.createElement('div');
+                div.className = `team-item ${team.id === state.myTeam ? 'my-team' : ''}`;
+                div.style.background = team.color + '33';
+                div.style.borderLeft = `4px solid ${team.color}`;
+                div.style.color = team.color;
+
+                div.innerHTML = `
+                    <div>
+                        <div class="team-name">${team.name}</div>
+                        <div class="team-members">${team.members?.length || 0} members</div>
+                    </div>
+                    <div class="team-score">${score}</div>
+                `;
+
+                if (team.id !== state.myTeam) {
+                    div.onclick = () => {
+                        if (confirm(`Switch to ${team.name}?`)) {
+                            joinTeam(team.id);
+                        }
+                    };
+                }
+
+                list.appendChild(div);
+            });
+        }
+
+        // ============ WINNER ============
+        function showWinner(winner) {
+            // Check if it's a team
+            let displayName = winner;
+            if (state.teamMode && state.teams) {
+                const team = state.teams.find(t => t.id === winner);
+                if (team) {
+                    displayName = team.name;
+                    document.getElementById('winnerName').style.color = team.color;
+                }
+            }
+            
+            document.getElementById('winnerName').textContent = displayName;
+            document.getElementById('winnerBanner').classList.remove('hidden');
+            document.getElementById('winnerBanner').classList.add('shown');
+        }
+
+        // ============ POLLING ============
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/room/${state.roomId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        updateFromServer(data);
+                    }
+                } catch (err) {}
+            }, 3000);
+        }
+
+        // Cleanup on page leave
+        window.onbeforeunload = () => {
+            if (pollInterval) clearInterval(pollInterval);
+        };
+    </script>
+</body>
+</html>
