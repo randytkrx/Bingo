@@ -1576,15 +1576,35 @@
                                     >
                                         <div className="flex items-center justify-between mb-3">
                                             <h3 className="font-display font-bold text-lg text-merc-accent">{game.roomId}</h3>
-                                            <span className={`text-xs px-2 py-1 rounded ${game.isEvent ? 'bg-merc-purple/20 text-merc-purple' : 'bg-merc-green/20 text-merc-green'}`}>
-                                                {game.isEvent ? '🏆 Event' : '🎮 Casual'}
-                                            </span>
+                                            <div className="flex gap-1">
+                                                {game.teamMode && (
+                                                    <span className="text-xs px-2 py-1 rounded bg-merc-blue/20 text-merc-blue">
+                                                        👥 Teams
+                                                    </span>
+                                                )}
+                                                <span className={`text-xs px-2 py-1 rounded ${game.isEvent ? 'bg-merc-purple/20 text-merc-purple' : 'bg-merc-green/20 text-merc-green'}`}>
+                                                    {game.isEvent ? '🏆 Event' : '🎮 Casual'}
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-4 text-sm text-gray-400">
                                             <span>👥 {game.players?.length || 0} players</span>
-                                            <span>📏 {game.boardSize}x{game.boardSize}</span>
+                                            <span>📏 {game.rows || game.boardSize}x{game.cols || game.boardSize}</span>
                                             {game.hasPassword && <span>🔒</span>}
                                         </div>
+                                        {game.teamMode && game.teams && (
+                                            <div className="mt-2 flex gap-2 flex-wrap">
+                                                {game.teams.map(team => (
+                                                    <span 
+                                                        key={team.id} 
+                                                        className="text-xs px-2 py-1 rounded"
+                                                        style={{ backgroundColor: team.color + '33', color: team.color }}
+                                                    >
+                                                        {team.name} ({team.members?.length || 0})
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                         <div className="mt-3 text-merc-accent text-sm">
                                             Join Game →
                                         </div>
