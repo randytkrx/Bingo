@@ -914,9 +914,11 @@
             rows: 3,
             cols: 3,
             starImage: null,
+            cardBackground: null,
             teamMode: false,
             teams: null,
-            myTeam: null
+            myTeam: null,
+            pendingResetId: null
         };
 
         // ============ HELPERS ============
@@ -1051,6 +1053,7 @@
             state.rows = room.rows || room.boardSize || 3;
             state.cols = room.cols || room.boardSize || 3;
             state.starImage = room.starImage || null;
+            state.cardBackground = room.cardBackground || null;
             state.teamMode = room.teamMode || false;
             state.teams = room.teams || null;
 
@@ -1070,6 +1073,11 @@
             // Apply custom star image if provided
             if (state.starImage) {
                 applyCustomStarImage(state.starImage);
+            }
+
+            // Apply custom card background if provided
+            if (state.cardBackground) {
+                applyCustomCardBackground(state.cardBackground);
             }
 
             // Check for team mode
@@ -1095,6 +1103,14 @@
             const style = document.createElement('style');
             style.id = 'custom-star-style';
             style.textContent = `.cell-front { background-image: url('${imageData}') !important; }`;
+            document.head.appendChild(style);
+        }
+
+        // Apply custom card background
+        function applyCustomCardBackground(imageData) {
+            const style = document.createElement('style');
+            style.id = 'custom-bg-style';
+            style.textContent = `.cell-back { background: url('${imageData}') center/cover !important; }`;
             document.head.appendChild(style);
         }
 
@@ -1479,29 +1495,111 @@
 
         // ============ RESET GAME ============
         async function resetGame() {
-            if (!state.roomId || !confirm('Start a new game with a fresh board?')) return;
+            if (!state.roomId || !confirm('Request a new board? Staff must approve with !race command.')) return;
 
             try {
                 const res = await fetch(`${API_BASE}/room/${state.roomId}/reset`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ign: state.ign })
                 });
 
-                if (!res.ok) throw new Error('Reset failed');
+                const data = await res.json();
 
-                const room = await res.json();
-                state.board = room.board;
-                state.winner = room.winner;
-                state.activeSquare = null;
-
-                document.getElementById('winnerBanner').classList.remove('show');
-                renderBoard();
-                updatePlayers();
-                showToast('New board generated!', 'success');
+                if (data.pending) {
+                    // Show verification code to user
+                    state.pendingResetId = data.verificationId;
+                    showResetVerificationModal(data.verificationId);
+                } else if (data.board) {
+                    // Reset was approved and completed
+                    state.board = data.board;
+                    state.winner = data.winner;
+                    state.activeSquare = null;
+                    document.getElementById('winnerBanner').classList.remove('show');
+                    renderBoard();
+                    updatePlayers();
+                    showToast('New board generated!', 'success');
+                }
 
             } catch (err) {
-                showToast('Failed to reset!', 'error');
+                showToast('Failed to request reset!', 'error');
             }
+        }
+
+        function showResetVerificationModal(verificationId) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('resetVerifyModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'resetVerifyModal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal">
+                        <h2>🔄 Reset Requested</h2>
+                        <p style="color: #ccc; margin-bottom: 15px;">Staff must approve this reset in Discord.</p>
+                        <div class="verification-code">
+                            <h3>Verification Code</h3>
+                            <div class="code-display" id="resetVerifyCode">${verificationId}</div>
+                        </div>
+                        <p style="color: #888; font-size: 0.9rem;">Tell staff to use: <code>!race ${verificationId}</code></p>
+                        <button class="btn btn-secondary" onclick="cancelResetRequest()" style="margin-top: 15px;">Cancel</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                document.getElementById('resetVerifyCode').textContent = verificationId;
+                modal.classList.remove('hidden');
+            }
+            
+            // Start polling for approval
+            pollResetApproval(verificationId);
+        }
+
+        async function pollResetApproval(verificationId) {
+            const poll = async () => {
+                if (state.pendingResetId !== verificationId) return;
+
+                try {
+                    const res = await fetch(`${API_BASE}/room/${state.roomId}`);
+                    const room = await res.json();
+
+                    if (room.pendingReset && room.pendingReset.verificationId === verificationId && room.pendingReset.approved) {
+                        // Reset was approved! Complete it
+                        const resetRes = await fetch(`${API_BASE}/room/${state.roomId}/reset`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ verificationId, ign: state.ign })
+                        });
+                        
+                        const data = await resetRes.json();
+                        if (data.board) {
+                            state.board = data.board;
+                            state.winner = data.winner;
+                            state.activeSquare = null;
+                            state.pendingResetId = null;
+                            
+                            document.getElementById('resetVerifyModal')?.classList.add('hidden');
+                            document.getElementById('winnerBanner').classList.remove('show');
+                            renderBoard();
+                            updatePlayers();
+                            showToast('Reset approved! New board generated!', 'success');
+                        }
+                        return;
+                    }
+
+                    // Keep polling
+                    setTimeout(poll, 3000);
+                } catch (err) {
+                    setTimeout(poll, 3000);
+                }
+            };
+            poll();
+        }
+
+        function cancelResetRequest() {
+            state.pendingResetId = null;
+            document.getElementById('resetVerifyModal')?.classList.add('hidden');
+            showToast('Reset request cancelled', 'info');
         }
 
         // ============ POLLING ============
