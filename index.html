@@ -327,7 +327,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect, createContext, useContext } = React;
+        const { useState, useEffect, createContext, useContext, useRef } = React;
 
         // ============ CONFIG ============
         const CONFIG = {
@@ -346,10 +346,11 @@
         // ============ POSTER API ============
         const POSTER_API = `${CONFIG.bingoApiBase}/posters`;
 
-        // Fetch posters from API
-        async function fetchPostersFromAPI() {
+        // Fetch posters from API (includeScheduled=true for staff to see future bounties)
+        async function fetchPostersFromAPI(includeScheduled = false) {
             try {
-                const res = await fetch(POSTER_API);
+                const endpoint = includeScheduled ? `${POSTER_API}/all` : POSTER_API;
+                const res = await fetch(endpoint);
                 if (!res.ok) {
                     console.error('Poster API returned:', res.status);
                     return [];
@@ -424,21 +425,23 @@
             }
         }
 
-        // Hook to fetch posters
-        function usePosters() {
+        // Hook to fetch posters (includeScheduled=true for staff to see future bounties)
+        function usePosters(includeScheduled = false) {
             const [posters, setPosters] = useState([]);
             const [loading, setLoading] = useState(true);
+            const includeScheduledRef = useRef(includeScheduled);
+            includeScheduledRef.current = includeScheduled;
 
             const refresh = async () => {
                 setLoading(true);
-                const data = await fetchPostersFromAPI();
+                const data = await fetchPostersFromAPI(includeScheduledRef.current);
                 setPosters(data);
                 setLoading(false);
             };
 
             useEffect(() => {
                 refresh();
-            }, []);
+            }, [includeScheduled]);
 
             return { posters, loading, refresh, setPosters };
         }
@@ -2016,7 +2019,7 @@
             const [loginLoading, setLoginLoading] = useState(false);
             const [activeSection, setActiveSection] = useState('news');
             const { bounties } = useBounties();
-            const { posters, loading: postersLoading, refresh: refreshPosters } = usePosters();
+            const { posters, loading: postersLoading, refresh: refreshPosters } = usePosters(true); // true = include scheduled/future bounties
             const { news: newsItems, loading: newsLoading, refresh: refreshNews } = useNews();
             const [saving, setSaving] = useState(false);
             
@@ -2706,13 +2709,31 @@
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {posters.map(poster => (
-                                        <div key={poster.id} className="bg-merc-bg rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    {posters.map(poster => {
+                                        const isScheduled = poster.startTime && new Date(poster.startTime) > new Date();
+                                        const isExpired = poster.endTime && new Date(poster.endTime) < new Date();
+                                        return (
+                                        <div key={poster.id} className={`bg-merc-bg rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isScheduled ? 'border-l-4 border-yellow-500' : ''} ${isExpired ? 'opacity-60' : ''}`}>
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
+                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                     <span className={`text-xs px-2 py-1 rounded ${poster.status === 'open' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                                         {poster.status === 'open' ? '🟢 Open' : '🔴 Claimed'}
                                                     </span>
+                                                    {isScheduled && (
+                                                        <span className="text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400">
+                                                            ⏰ Scheduled: {new Date(poster.startTime).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                    {isExpired && (
+                                                        <span className="text-xs px-2 py-1 rounded bg-gray-500/20 text-gray-400">
+                                                            ⌛ Expired
+                                                        </span>
+                                                    )}
+                                                    {poster.endTime && !isExpired && (
+                                                        <span className="text-xs px-2 py-1 rounded bg-orange-500/20 text-orange-400">
+                                                            Ends: {new Date(poster.endTime).toLocaleString()}
+                                                        </span>
+                                                    )}
                                                     <span className="text-xs text-gray-500">{poster.style}</span>
                                                 </div>
                                                 <h3 className="font-bold text-lg">{poster.title}</h3>
@@ -2742,7 +2763,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                    ))}
+                                    )})}
                                 </div>
                             )}
                         </div>
