@@ -2034,6 +2034,8 @@
             const [posterHost, setPosterHost] = useState('');
             const [posterWinner, setPosterWinner] = useState('');
             const [posterImage, setPosterImage] = useState('');
+            const [posterStartTime, setPosterStartTime] = useState('');
+            const [posterEndTime, setPosterEndTime] = useState('');
 
             // Check session
             useEffect(() => {
@@ -2065,6 +2067,9 @@
                     setPosterHost(editingPoster.host || '');
                     setPosterWinner(editingPoster.winner || '');
                     setPosterImage(editingPoster.image || '');
+                    // Convert ISO to datetime-local format
+                    setPosterStartTime(editingPoster.startTime ? editingPoster.startTime.slice(0, 16) : '');
+                    setPosterEndTime(editingPoster.endTime ? editingPoster.endTime.slice(0, 16) : '');
                 }
             }, [editingPoster]);
 
@@ -2163,6 +2168,8 @@
                 setPosterHost('');
                 setPosterWinner('');
                 setPosterImage('');
+                setPosterStartTime('');
+                setPosterEndTime('');
                 setEditingPoster(null);
                 setSelectedBounty(null);
             };
@@ -2202,6 +2209,8 @@
                     winner: posterWinner,
                     image: posterImage,
                     date: editingPoster?.date || new Date().toISOString(),
+                    startTime: posterStartTime ? new Date(posterStartTime).toISOString() : null,
+                    endTime: posterEndTime ? new Date(posterEndTime).toISOString() : null,
                     updatedAt: new Date().toISOString()
                 };
 
@@ -2569,6 +2578,31 @@
                                                 <option value="dark">🌙 Dark Gold</option>
                                                 <option value="bloody">🩸 Blood Red</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Scheduling */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-gray-400 text-sm mb-1 block">⏰ Start Time (optional)</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={posterStartTime}
+                                                onChange={(e) => setPosterStartTime(e.target.value)}
+                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            />
+                                            <p className="text-gray-500 text-xs mt-1">Bounty hidden until this time</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="text-gray-400 text-sm mb-1 block">⏰ End Time (optional)</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={posterEndTime}
+                                                onChange={(e) => setPosterEndTime(e.target.value)}
+                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            />
+                                            <p className="text-gray-500 text-xs mt-1">Bounty expires at this time</p>
                                         </div>
                                     </div>
 
