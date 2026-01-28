@@ -118,6 +118,7 @@
             
             // Background state
             const [cardBackground, setCardBackground] = useState('');
+            const [starImage, setStarImage] = useState('');
             
             // Team state
             const [teamMode, setTeamMode] = useState(false);
@@ -202,6 +203,7 @@
                         isEvent,
                         customTiles: useCustomBoard ? customTiles : null,
                         cardBackground: cardBackground || null,
+                        starImage: starImage || null,
                         teamMode,
                         teams: teamMode ? teams : null
                     };
@@ -273,6 +275,17 @@
                     reader.readAsDataURL(file);
                 } else if (file) {
                     alert('Image too large. Max 500KB.');
+                }
+            };
+
+            const handleStarImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file && file.size < 300000) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => setStarImage(ev.target.result);
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    alert('Image too large. Max 300KB.');
                 }
             };
 
@@ -473,22 +486,47 @@
                                     )}
                                 </div>
 
-                                {/* Card Background */}
+                                {/* Card Customization */}
                                 <div className="bg-merc-card border border-merc-border rounded-xl p-6">
-                                    <h2 className="font-display text-xl font-bold mb-4">🎨 Custom Card Background</h2>
-                                    <p className="text-gray-400 text-sm mb-3">Upload a custom scratch card background (max 500KB)</p>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleBackgroundUpload}
-                                        className="w-full"
-                                    />
-                                    {cardBackground && (
-                                        <div className="mt-3 flex items-center gap-3">
-                                            <img src={cardBackground} alt="Preview" className="w-20 h-20 object-cover rounded border border-merc-border" />
-                                            <button onClick={() => setCardBackground('')} className="text-red-400 text-sm">Remove</button>
-                                        </div>
-                                    )}
+                                    <h2 className="font-display text-xl font-bold mb-4">🎨 Card Appearance</h2>
+                                    
+                                    {/* Star/Seal Image */}
+                                    <div className="mb-4">
+                                        <label className="text-gray-400 text-sm block mb-2">⭐ Scratch Card Icon (the "?" replacement)</label>
+                                        <p className="text-gray-500 text-xs mb-2">This image appears on unscratched tiles. Use a PNG with transparent background. Max 300KB.</p>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleStarImageUpload}
+                                            className="w-full"
+                                        />
+                                        {starImage && (
+                                            <div className="mt-2 flex items-center gap-3">
+                                                <div className="w-16 h-16 bg-merc-bg rounded flex items-center justify-center">
+                                                    <img src={starImage} alt="Star" className="max-w-full max-h-full object-contain" />
+                                                </div>
+                                                <button onClick={() => setStarImage('')} className="text-red-400 text-sm">Remove</button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Background Image */}
+                                    <div>
+                                        <label className="text-gray-400 text-sm block mb-2">🖼️ Card Background (behind the icon)</label>
+                                        <p className="text-gray-500 text-xs mb-2">Optional background image for scratch cards. Max 500KB.</p>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleBackgroundUpload}
+                                            className="w-full"
+                                        />
+                                        {cardBackground && (
+                                            <div className="mt-2 flex items-center gap-3">
+                                                <img src={cardBackground} alt="Preview" className="w-16 h-16 object-cover rounded border border-merc-border" />
+                                                <button onClick={() => setCardBackground('')} className="text-red-400 text-sm">Remove</button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Create Button */}
