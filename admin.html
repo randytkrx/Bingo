@@ -422,7 +422,17 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Password Modal -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal" style="max-width: 400px;">
+            <h2>🔒 Admin Access</h2>
+            <input type="password" id="adminPassword" placeholder="Enter admin password" style="width: 100%; padding: 15px; font-family: 'Pirata One', cursive; font-size: 1.2rem; background: rgba(0,0,0,0.6); border: 2px solid var(--gold); border-radius: 10px; color: var(--gold-light); text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-gold" onclick="checkPassword()" style="width: 100%;">Enter</button>
+            <p id="passwordError" style="color: var(--danger); margin-top: 15px; display: none;">Incorrect password</p>
+        </div>
+    </div>
+
+    <div class="container" id="adminContent" style="display: none;">
         <h1>⚔️ OSRS Bingo Admin Panel ⚔️</h1>
 
         <!-- Stats Row -->
@@ -570,9 +580,36 @@
     <button class="btn btn-gold refresh-btn" onclick="loadRooms()">🔄</button>
 
     <script>
+        const ADMIN_PASSWORD = 'M3r3c';
         const API_BASE = 'https://api.mercenarypvm.co.uk/api';
         let allRooms = [];
         let currentModalRoom = null;
+
+        // Check if already authenticated
+        if (sessionStorage.getItem('adminAuth') === 'true') {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+            loadRooms();
+        }
+
+        // Password check
+        function checkPassword() {
+            const input = document.getElementById('adminPassword').value;
+            if (input === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminAuth', 'true');
+                document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadRooms();
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        // Allow Enter key for password
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
 
         // Toast
         function showToast(message, type = 'success') {
