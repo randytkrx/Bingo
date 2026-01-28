@@ -263,6 +263,7 @@
 
         // ============ UTILS ============
         const formatNumber = (num) => {
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
             if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
             return num?.toLocaleString() || '0';
@@ -511,6 +512,9 @@
                 const gp = parseInt(row[1]?.replace(/[^0-9]/g, '')) || 0;
                 return sum + gp;
             }, 0);
+            
+            // Splits are stored in millions in the sheet, so multiply by 1M for display
+            const totalSplitsGP = totalSplits * 1000000;
 
             const topMembers = [...members].sort((a, b) => 
                 parseInt(b.splits || 0) - parseInt(a.splits || 0)
@@ -539,7 +543,7 @@
                         <StatCard icon="⚔️" label="Active Events" value="2" delay={0} />
                         <StatCard icon="👥" label="Total Members" value={members.length} color="merc-blue" delay={100} />
                         <StatCard icon="🏆" label="Total Drops" value={members.reduce((s, m) => s + parseInt(m.drops || 0), 0)} color="merc-orange" delay={200} />
-                        <StatCard icon="💰" label="Total Splits" value={formatNumber(totalSplits) + ' GP'} color="merc-green" delay={300} />
+                        <StatCard icon="💰" label="Total Splits" value={formatNumber(totalSplitsGP) + ' GP'} color="merc-green" delay={300} />
                     </div>
 
                     {/* Player Showcase */}
