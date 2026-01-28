@@ -151,19 +151,28 @@
         .cell-front {
             background: linear-gradient(135deg, #2d1b4e 0%, #1a0a2e 100%);
             border: 3px solid var(--gold);
+            position: relative;
+            overflow: hidden;
         }
-        .cell-front-custom {
-            background-size: cover !important;
-            background-position: center !important;
+        /* Custom background layer */
+        .cell-front::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--card-bg, none);
+            background-size: cover;
+            background-position: center;
+            opacity: 0.7;
         }
-        .cell-front::after {
-            content: '?';
-            font-family: 'Cinzel', serif;
-            font-size: 2.5rem;
-            color: var(--gold-light);
-            text-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
+        /* Star/seal image on top */
+        .cell-front-star {
+            position: relative;
+            z-index: 1;
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(244, 208, 63, 0.6));
         }
-        .cell-front-custom::after { content: ''; }
         .cell-back {
             background: linear-gradient(135deg, rgba(74, 14, 74, 0.9) 0%, rgba(26, 10, 46, 0.95) 100%);
             border: 3px solid var(--gold);
@@ -499,6 +508,7 @@
             teams: null,
             myTeam: null,
             cardBackground: null,
+            starImage: null,
             requireVerification: true,
             pendingVerification: null,
             pendingSquareId: null
@@ -600,6 +610,7 @@
             state.teamMode = room.teamMode || false;
             state.teams = room.teams || null;
             state.cardBackground = room.cardBackground || null;
+            state.starImage = room.starImage || null;
             state.requireVerification = room.requireVerification !== false;
 
             document.getElementById('joinModal').classList.add('hidden');
@@ -689,6 +700,9 @@
         }
 
         // ============ RENDER BOARD ============
+        // Default star/seal image for scratch cards
+        const STAR_IMAGE = 'https://oldschool.runescape.wiki/images/Stale_baguette_detail.png'; // Placeholder - will be replaced
+
         function renderBoard() {
             const grid = document.getElementById('bingoGrid');
             grid.innerHTML = '';
@@ -707,10 +721,14 @@
                     if (team) teamColor = team.color;
                 }
 
+                // Use custom star image if provided, otherwise default
+                const starImg = state.starImage || STAR_IMAGE;
+
                 div.innerHTML = `
                     <div class="cell-inner">
-                        <div class="cell-front ${state.cardBackground ? 'cell-front-custom' : ''}" 
-                             ${state.cardBackground ? `style="background: url('${state.cardBackground}')"` : ''}></div>
+                        <div class="cell-front" ${state.cardBackground ? `style="--card-bg: url('${state.cardBackground}')"` : ''}>
+                            <img src="${starImg}" class="cell-front-star" onerror="this.style.display='none'">
+                        </div>
                         <div class="cell-back ${teamColor ? 'team-claimed' : ''}" 
                              ${teamColor ? `style="border-color: ${teamColor}"` : ''}>
                             ${cell.customImage 
