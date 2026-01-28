@@ -338,7 +338,7 @@
             womGroupId: 0, // Set your WiseOldMan group ID if you have one
             discordServerId: '785901975585161226',
             bingoApiBase: 'https://api.mercenarypvm.co.uk/api',
-            staffPassword: 'M3r3c',
+            // Password validated server-side only for security
         };
 
         const IGNORED_NAMES = ["Staff", "Wrath", "Zenyte", "Onyx", "Dragonstone", "Beast", "1 Nana", "2 Nana", "3 Nana", "Serenist", "", undefined];
@@ -1940,6 +1940,7 @@
             const [password, setPassword] = useState('');
             const [staffPassword, setStaffPassword] = useState(''); // Store password for API calls
             const [error, setError] = useState('');
+            const [loginLoading, setLoginLoading] = useState(false);
             const [activeSection, setActiveSection] = useState('news');
             const { bounties } = useBounties();
             const { posters, loading: postersLoading, refresh: refreshPosters } = usePosters();
@@ -1994,15 +1995,38 @@
                 }
             }, [editingPoster]);
 
-            const handleLogin = () => {
-                if (password === CONFIG.staffPassword) {
-                    setAuthenticated(true);
-                    setStaffPassword(password); // Store for API calls
-                    sessionStorage.setItem('staffAuth', 'true');
-                    sessionStorage.setItem('staffPwd', password);
-                    setError('');
-                } else {
-                    setError('Incorrect password');
+            const handleLogin = async () => {
+                if (!password) {
+                    setError('Please enter a password');
+                    return;
+                }
+
+                setLoginLoading(true);
+                setError('');
+
+                try {
+                    const res = await fetch(`${CONFIG.bingoApiBase}/auth/verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        setAuthenticated(true);
+                        setStaffPassword(password); // Store for API calls
+                        sessionStorage.setItem('staffAuth', 'true');
+                        sessionStorage.setItem('staffPwd', password);
+                        setError('');
+                    } else {
+                        setError('Incorrect password');
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    setError('Could not connect to server');
+                } finally {
+                    setLoginLoading(false);
                 }
             };
 
@@ -2207,9 +2231,10 @@
                             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
                             <button
                                 onClick={handleLogin}
-                                className="w-full py-3 bg-gradient-to-r from-merc-accent to-merc-orange text-merc-bg font-display font-bold rounded-lg hover:opacity-90 transition-opacity"
+                                disabled={loginLoading}
+                                className="w-full py-3 bg-gradient-to-r from-merc-accent to-merc-orange text-merc-bg font-display font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                             >
-                                Login
+                                {loginLoading ? '⏳ Verifying...' : 'Login'}
                             </button>
                         </div>
                     </div>
