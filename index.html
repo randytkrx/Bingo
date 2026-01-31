@@ -2676,7 +2676,7 @@
             const handleImageUpload = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    if (file.size > 500000) { // 500KB limit for localStorage
+                    if (file.size > 50000000) { // 500KB limit for localStorage
                         alert('Image too large! Please use an image under 500KB.');
                         return;
                     }
