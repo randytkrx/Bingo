@@ -317,6 +317,198 @@
             text-transform: uppercase;
             pointer-events: none;
         }
+
+        /* Activity Ticker */
+        .activity-ticker {
+            background: linear-gradient(90deg, #0d0f14 0%, #141820 50%, #0d0f14 100%);
+            border-top: 1px solid #2a3042;
+            border-bottom: 1px solid #2a3042;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .activity-ticker-content {
+            display: inline-flex;
+            animation: ticker 30s linear infinite;
+        }
+        .activity-ticker-content:hover {
+            animation-play-state: paused;
+        }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .activity-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 8px;
+        }
+
+        /* Calendar Styles */
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px;
+            border: 1px solid #2a3042;
+            min-height: 80px;
+        }
+        .calendar-day.today {
+            background: rgba(230, 169, 25, 0.1);
+            border-color: #e6a919;
+        }
+        .calendar-day.has-event {
+            background: rgba(74, 222, 128, 0.1);
+        }
+        .calendar-event-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin: 1px;
+        }
+
+        /* Countdown Timer */
+        .countdown-unit {
+            background: linear-gradient(180deg, #1a1f2a 0%, #141820 100%);
+            border: 1px solid #2a3042;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e6a919;
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Achievement Badge */
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #1a1f2a 0%, #0d0f14 100%);
+            border: 1px solid #e6a919;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        .achievement-badge.locked {
+            opacity: 0.4;
+            border-color: #2a3042;
+        }
+
+        /* Player Profile Modal */
+        .profile-stat-card {
+            background: linear-gradient(180deg, #1a1f2a 0%, #141820 100%);
+            border: 1px solid #2a3042;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .profile-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e6a919;
+        }
+
+        /* Dark/Light Mode Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            border-radius: 15px;
+            background: #2a3042;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e6a919;
+            transition: all 0.3s;
+        }
+        .theme-toggle.light {
+            background: #e6a919;
+        }
+        .theme-toggle.light::after {
+            left: 33px;
+            background: #fff;
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode {
+            background: #f5f5f5;
+        }
+        body.light-mode .bg-merc-bg { background: #ffffff; }
+        body.light-mode .bg-merc-card { background: #f0f0f0; }
+        body.light-mode .text-white { color: #1a1a1a; }
+        body.light-mode .text-gray-400 { color: #666; }
+        body.light-mode .text-gray-500 { color: #888; }
+        body.light-mode .border-merc-border { border-color: #ddd; }
+
+        /* Hall of Fame Card */
+        .hof-card {
+            background: linear-gradient(135deg, #1a1f2a 0%, #0d0f14 100%);
+            border: 2px solid #e6a919;
+            overflow: hidden;
+            position: relative;
+        }
+        .hof-card::before {
+            content: '⭐';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+        }
+
+        /* Leaderboard Rank */
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .rank-badge.gold { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; }
+        .rank-badge.silver { background: linear-gradient(135deg, #c0c0c0, #808080); color: #000; }
+        .rank-badge.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+
+        /* Calculator Styles */
+        .calc-input {
+            background: #0d0f14;
+            border: 2px solid #2a3042;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .calc-input:focus {
+            border-color: #e6a919;
+            outline: none;
+            box-shadow: 0 0 10px rgba(230, 169, 25, 0.3);
+        }
+        .calc-result {
+            background: linear-gradient(135deg, rgba(230, 169, 25, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border: 1px solid #e6a919;
+            padding: 20px;
+            border-radius: 12px;
+        }
     </style>
 </head>
 <body>
@@ -335,7 +527,7 @@
             sheetId: '1Su9vcEcDmH02nzqtkYhO5dK-TxorHzRGzZbF8OHTXb8',
             bountySheetId: '1_JDDPAEuBOuIIR1R-VYbOj4idL-oQUAyAuafwOHs3kk',
             apiKey: 'AIzaSyBZchFlW_joIa7CnSSacm8oalKQqYayhyk',
-            womGroupId: 0, // Set your WiseOldMan group ID if you have one
+            womGroupId: 2830, // Mercenary PvM WiseOldMan group
             discordServerId: '785901975585161226',
             bingoApiBase: 'https://api.mercenarypvm.co.uk/api',
             // Password validated server-side only for security
@@ -557,6 +749,215 @@
             return { osrsNews, loading };
         }
 
+        // ============ ACTIVITY FEED API ============
+        async function fetchActivity(limit = 50) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/activity?limit=${limit}`);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch activity:', err);
+                return [];
+            }
+        }
+
+        function useActivity(limit = 50) {
+            const [activity, setActivity] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            const refresh = async () => {
+                const data = await fetchActivity(limit);
+                setActivity(data);
+                setLoading(false);
+            };
+
+            useEffect(() => {
+                refresh();
+                const interval = setInterval(refresh, 30000); // Refresh every 30s
+                return () => clearInterval(interval);
+            }, [limit]);
+
+            return { activity, loading, refresh };
+        }
+
+        // ============ LEADERBOARD API ============
+        async function fetchLeaderboard(type = 'points') {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/leaderboard?type=${type}`);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch leaderboard:', err);
+                return [];
+            }
+        }
+
+        function useLeaderboard(type = 'points') {
+            const [leaderboard, setLeaderboard] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                async function load() {
+                    const data = await fetchLeaderboard(type);
+                    setLeaderboard(data);
+                    setLoading(false);
+                }
+                load();
+            }, [type]);
+
+            return { leaderboard, loading };
+        }
+
+        // ============ PLAYER PROFILE API ============
+        async function fetchPlayerProfile(name) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/player/${encodeURIComponent(name)}`);
+                if (!res.ok) return null;
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch player:', err);
+                return null;
+            }
+        }
+
+        // ============ ACHIEVEMENTS API ============
+        async function fetchAchievements() {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/achievements`);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch achievements:', err);
+                return [];
+            }
+        }
+
+        function useAchievements() {
+            const [achievements, setAchievements] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                async function load() {
+                    const data = await fetchAchievements();
+                    setAchievements(data);
+                    setLoading(false);
+                }
+                load();
+            }, []);
+
+            return { achievements, loading };
+        }
+
+        // ============ HALL OF FAME API ============
+        async function fetchHallOfFame() {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/hall-of-fame`);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch hall of fame:', err);
+                return [];
+            }
+        }
+
+        function useHallOfFame() {
+            const [items, setItems] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            const refresh = async () => {
+                const data = await fetchHallOfFame();
+                setItems(data);
+                setLoading(false);
+            };
+
+            useEffect(() => {
+                refresh();
+            }, []);
+
+            return { items, loading, refresh };
+        }
+
+        async function addToHallOfFame(item, password) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/hall-of-fame`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item, password })
+                });
+                return await res.json();
+            } catch (err) {
+                return { error: err.message };
+            }
+        }
+
+        async function deleteFromHallOfFame(id, password) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/hall-of-fame/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                return await res.json();
+            } catch (err) {
+                return { error: err.message };
+            }
+        }
+
+        // ============ EVENTS/CALENDAR API ============
+        async function fetchEvents() {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/events`);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch events:', err);
+                return [];
+            }
+        }
+
+        function useEvents() {
+            const [events, setEvents] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            const refresh = async () => {
+                const data = await fetchEvents();
+                setEvents(data);
+                setLoading(false);
+            };
+
+            useEffect(() => {
+                refresh();
+            }, []);
+
+            return { events, loading, refresh };
+        }
+
+        async function createEvent(event, password) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/events`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event, password })
+                });
+                return await res.json();
+            } catch (err) {
+                return { error: err.message };
+            }
+        }
+
+        async function deleteEvent(id, password) {
+            try {
+                const res = await fetch(`${CONFIG.bingoApiBase}/events/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                return await res.json();
+            } catch (err) {
+                return { error: err.message };
+            }
+        }
+
         // ============ CONTEXT ============
         const AppContext = createContext();
 
@@ -716,9 +1117,11 @@
                 { id: 'news', label: 'News', icon: '📰' },
                 { id: 'bounties', label: 'Bounties', icon: '🎯' },
                 { id: 'leaderboards', label: 'Leaderboards', icon: '🏆' },
+                { id: 'hall-of-fame', label: 'Hall of Fame', icon: '⭐' },
+                { id: 'calendar', label: 'Calendar', icon: '📅' },
+                { id: 'tools', label: 'Tools', icon: '🔧' },
                 { id: 'members', label: 'Members', icon: '👥' },
                 { id: 'bingo', label: 'Bingo', icon: '🎲' },
-                { id: 'search', label: 'Search', icon: '🔍' },
                 { id: 'staff', label: 'Staff', icon: '⚙️' },
             ];
 
@@ -999,7 +1402,7 @@
         // Dashboard Page
         function Dashboard({ setCurrentPage }) {
             const { data: frontPageData, loading } = useSheetData('Front Page!A2:H1000');
-            const { data: splitsData } = useSheetData('Clan splits!A2:B1000');
+            const { data: allTimeSplitData } = useSheetData('Front Page!R7'); // All Time GP Split (B)
             const { bounties, loading: bountiesLoading, error: bountiesError } = useBounties();
             const { posters, loading: postersLoading } = usePosters();
             
@@ -1016,13 +1419,9 @@
                 }))
                 .filter(m => m.name && !IGNORED_NAMES.includes(m.name));
 
-            const totalSplits = splitsData.reduce((sum, row) => {
-                const gp = parseInt(row[1]?.replace(/[^0-9]/g, '')) || 0;
-                return sum + gp;
-            }, 0);
-            
-            // Splits are stored in millions in the sheet, so multiply by 1M for display
-            const totalSplitsGP = totalSplits * 1000000;
+            // R8 contains All Time GP Split in billions
+            const allTimeSplitBillions = parseFloat(allTimeSplitData[0]?.[0]?.toString().replace(/,/g, '')) || 0;
+            const totalSplitsGP = allTimeSplitBillions * 1000000000;
 
             // Get active (open) posters for display
             const activePosters = posters.filter(p => p.status === 'open').slice(0, 3);
@@ -1038,6 +1437,9 @@
 
             return (
                 <div className="space-y-8 fade-in">
+                    {/* Activity Ticker */}
+                    <ActivityTicker />
+
                     {/* Hero Section */}
                     <div className="text-center py-12 hero-bg rounded-2xl border border-merc-border">
                         <h1 className="font-display text-4xl md:text-5xl font-black text-glow">
@@ -1045,6 +1447,22 @@
                         </h1>
                         <p className="text-gray-400 mt-3 font-body text-lg">Your OldSchool RuneScape Clan Hub</p>
                     </div>
+
+                    {/* Upcoming Bounty Countdown */}
+                    {activePosters.filter(p => p.endTime).length > 0 && (
+                        <div className="bg-merc-card rounded-xl border border-merc-border p-6">
+                            <h2 className="font-display text-xl font-bold text-merc-accent mb-4 text-center">⏰ Bounty Ending Soon</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {activePosters.filter(p => p.endTime).slice(0, 2).map(poster => (
+                                    <div key={poster.id} className="bg-merc-bg rounded-lg p-4">
+                                        <h3 className="font-bold mb-2 text-center">{poster.title}</h3>
+                                        <p className="text-merc-green text-center mb-3">{poster.reward}M GP</p>
+                                        <CountdownTimer targetDate={poster.endTime} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1362,8 +1780,25 @@
             const altName = member.altName || parsePlayerName(member.name).alt;
             const { player: womData, loading } = useWiseOldMan(mainName);
             const [imgError, setImgError] = useState(false);
+            const [clanStats, setClanStats] = useState(null);
+            const { achievements } = useAchievements();
             
             const initials = mainName?.substring(0, 2).toUpperCase() || '??';
+
+            // Fetch clan competition stats
+            useEffect(() => {
+                async function loadClanStats() {
+                    const profile = await fetchPlayerProfile(mainName);
+                    if (profile?.stats) {
+                        setClanStats(profile.stats);
+                    }
+                }
+                loadClanStats();
+            }, [mainName]);
+
+            const playerAchievements = achievements.filter(a => 
+                clanStats?.achievements?.includes(a.id)
+            );
 
             const topSkills = womData?.latestSnapshot?.data?.skills 
                 ? Object.entries(womData.latestSnapshot.data.skills)
@@ -1409,8 +1844,19 @@
                                 <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl">×</button>
                             </div>
 
+                            {/* Achievements */}
+                            {playerAchievements.length > 0 && (
+                                <div className="mb-4 flex flex-wrap gap-2">
+                                    {playerAchievements.map(a => (
+                                        <span key={a.id} className="achievement-badge" title={a.description}>
+                                            {a.icon} {a.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Clan Stats */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                                 <div className="bg-merc-bg rounded-lg p-3 text-center">
                                     <p className="text-gray-500 text-xs">Splits</p>
                                     <p className="text-merc-green font-tech font-bold text-lg">{member.splits}M</p>
@@ -1428,6 +1874,28 @@
                                     <p className="text-merc-purple font-tech font-bold text-lg">{member.daysInClan}</p>
                                 </div>
                             </div>
+
+                            {/* Competition Stats */}
+                            {clanStats && (clanStats.totalPoints > 0 || clanStats.bountiesClaimed > 0 || clanStats.bingoWins > 0) && (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                                    <div className="bg-merc-bg rounded-lg p-3 text-center border border-merc-accent/30">
+                                        <p className="text-gray-500 text-xs">⭐ Points</p>
+                                        <p className="text-merc-accent font-tech font-bold text-lg">{clanStats.totalPoints}</p>
+                                    </div>
+                                    <div className="bg-merc-bg rounded-lg p-3 text-center border border-merc-green/30">
+                                        <p className="text-gray-500 text-xs">🎯 Bounties</p>
+                                        <p className="text-merc-green font-tech font-bold text-lg">{clanStats.bountiesClaimed}</p>
+                                    </div>
+                                    <div className="bg-merc-bg rounded-lg p-3 text-center border border-merc-purple/30">
+                                        <p className="text-gray-500 text-xs">🏆 Bingo Wins</p>
+                                        <p className="text-merc-purple font-tech font-bold text-lg">{clanStats.bingoWins}</p>
+                                    </div>
+                                    <div className="bg-merc-bg rounded-lg p-3 text-center border border-merc-blue/30">
+                                        <p className="text-gray-500 text-xs">🧩 Tiles</p>
+                                        <p className="text-merc-blue font-tech font-bold text-lg">{clanStats.bingoTilesClaimed}</p>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* WOM Data */}
                             {loading ? (
@@ -1572,10 +2040,9 @@
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {games.map(game => (
-                                    <a 
+                                    <div 
                                         key={game.roomId}
-                                        href={`bingo.html?room=${game.roomId}`}
-                                        className="bg-merc-card rounded-xl border border-merc-border p-5 card-hover block"
+                                        className="bg-merc-card rounded-xl border border-merc-border p-5 card-hover"
                                     >
                                         <div className="flex items-center justify-between mb-3">
                                             <h3 className="font-display font-bold text-lg text-merc-accent">{game.roomId}</h3>
@@ -1608,10 +2075,22 @@
                                                 ))}
                                             </div>
                                         )}
-                                        <div className="mt-3 text-merc-accent text-sm">
-                                            Join Game →
+                                        <div className="mt-4 flex gap-2">
+                                            <a 
+                                                href={`bingo.html?room=${game.roomId}`}
+                                                className="flex-1 text-center px-4 py-2 bg-merc-accent text-merc-bg font-bold rounded-lg hover:opacity-90 transition-opacity"
+                                            >
+                                                Join Game
+                                            </a>
+                                            <a 
+                                                href={`bingo.html?room=${game.roomId}&spectate=true`}
+                                                className="px-4 py-2 bg-merc-card border border-merc-border text-gray-300 font-bold rounded-lg hover:border-merc-accent transition-colors"
+                                                title="Watch without playing"
+                                            >
+                                                👁️
+                                            </a>
                                         </div>
-                                    </a>
+                                    </div>
                                 ))}
                             </div>
                         )}
@@ -2021,6 +2500,8 @@
             const { bounties } = useBounties();
             const { posters, loading: postersLoading, refresh: refreshPosters } = usePosters(true); // true = include scheduled/future bounties
             const { news: newsItems, loading: newsLoading, refresh: refreshNews } = useNews();
+            const { items: hofItems, loading: hofLoading, refresh: refreshHof } = useHallOfFame();
+            const { events, loading: eventsLoading, refresh: refreshEvents } = useEvents();
             const [saving, setSaving] = useState(false);
             
             const [editingItem, setEditingItem] = useState(null);
@@ -2039,6 +2520,20 @@
             const [posterImage, setPosterImage] = useState('');
             const [posterStartTime, setPosterStartTime] = useState('');
             const [posterEndTime, setPosterEndTime] = useState('');
+
+            // Hall of Fame state
+            const [hofTitle, setHofTitle] = useState('');
+            const [hofPlayer, setHofPlayer] = useState('');
+            const [hofDescription, setHofDescription] = useState('');
+            const [hofCategory, setHofCategory] = useState('drop');
+            const [hofImage, setHofImage] = useState('');
+
+            // Event state
+            const [eventTitle, setEventTitle] = useState('');
+            const [eventType, setEventType] = useState('general');
+            const [eventStartDate, setEventStartDate] = useState('');
+            const [eventEndDate, setEventEndDate] = useState('');
+            const [eventDescription, setEventDescription] = useState('');
 
             // Check session
             useEffect(() => {
@@ -2369,6 +2864,26 @@
                             }`}
                         >
                             📋 Manage Posters ({posters.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveSection('hall-of-fame')}
+                            className={`px-4 py-2 rounded-lg font-body font-semibold ${
+                                activeSection === 'hall-of-fame' 
+                                    ? 'bg-merc-accent/20 text-merc-accent' 
+                                    : 'bg-merc-card text-gray-400'
+                            }`}
+                        >
+                            ⭐ Hall of Fame
+                        </button>
+                        <button
+                            onClick={() => setActiveSection('calendar')}
+                            className={`px-4 py-2 rounded-lg font-body font-semibold ${
+                                activeSection === 'calendar' 
+                                    ? 'bg-merc-accent/20 text-merc-accent' 
+                                    : 'bg-merc-card text-gray-400'
+                            }`}
+                        >
+                            📅 Events
                         </button>
                         <a
                             href="admin.html"
@@ -2768,6 +3283,318 @@
                             )}
                         </div>
                     )}
+
+                    {/* Hall of Fame Section */}
+                    {activeSection === 'hall-of-fame' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Add Form */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-6">
+                                <h2 className="font-display font-bold text-xl mb-4">⭐ Add to Hall of Fame</h2>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Title *</label>
+                                        <input
+                                            type="text"
+                                            value={hofTitle}
+                                            onChange={(e) => setHofTitle(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., First Twisted Bow"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Player Name *</label>
+                                        <input
+                                            type="text"
+                                            value={hofPlayer}
+                                            onChange={(e) => setHofPlayer(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            placeholder="RSN"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Category</label>
+                                        <select
+                                            value={hofCategory}
+                                            onChange={(e) => setHofCategory(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="drop">💎 Rare Drop</option>
+                                            <option value="achievement">🏆 Achievement</option>
+                                            <option value="moment">📸 Memorable Moment</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Description</label>
+                                        <textarea
+                                            value={hofDescription}
+                                            onChange={(e) => setHofDescription(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            rows={3}
+                                            placeholder="Details about this moment..."
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Screenshot (max 500KB)</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file && file.size < 500000) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = (ev) => setHofImage(ev.target.result);
+                                                    reader.readAsDataURL(file);
+                                                } else if (file) {
+                                                    alert('Image too large!');
+                                                }
+                                            }}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                        />
+                                        {hofImage && (
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <img src={hofImage} alt="Preview" className="w-20 h-20 object-cover rounded" />
+                                                <button onClick={() => setHofImage('')} className="text-red-400 text-sm">Remove</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <button
+                                        onClick={async () => {
+                                            if (!hofTitle || !hofPlayer) {
+                                                alert('Please fill in title and player name');
+                                                return;
+                                            }
+                                            setSaving(true);
+                                            const result = await addToHallOfFame({
+                                                title: hofTitle,
+                                                player: hofPlayer,
+                                                description: hofDescription,
+                                                category: hofCategory,
+                                                image: hofImage
+                                            }, staffPassword);
+                                            setSaving(false);
+                                            if (result.error) {
+                                                alert('Error: ' + result.error);
+                                            } else {
+                                                alert('Added to Hall of Fame!');
+                                                setHofTitle('');
+                                                setHofPlayer('');
+                                                setHofDescription('');
+                                                setHofCategory('drop');
+                                                setHofImage('');
+                                                refreshHof();
+                                            }
+                                        }}
+                                        disabled={saving}
+                                        className="w-full py-3 bg-gradient-to-r from-merc-accent to-merc-orange text-merc-bg font-display font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                                    >
+                                        {saving ? '⏳ Saving...' : '⭐ Add to Hall of Fame'}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Existing Items */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-6">
+                                <h2 className="font-display font-bold text-xl mb-4">📋 Current Entries ({hofItems.length})</h2>
+                                
+                                {hofLoading ? (
+                                    <p className="text-gray-500">Loading...</p>
+                                ) : hofItems.length === 0 ? (
+                                    <p className="text-gray-500">No entries yet</p>
+                                ) : (
+                                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                                        {hofItems.map(item => (
+                                            <div key={item.id} className="bg-merc-bg rounded-lg p-3 flex items-center gap-3">
+                                                {item.image && (
+                                                    <img src={item.image} alt={item.title} className="w-12 h-12 object-cover rounded" />
+                                                )}
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold">{item.title}</h3>
+                                                    <p className="text-gray-400 text-sm">by {item.player}</p>
+                                                </div>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm('Remove this from Hall of Fame?')) {
+                                                            const result = await deleteFromHallOfFame(item.id, staffPassword);
+                                                            if (result.error) {
+                                                                alert('Error: ' + result.error);
+                                                            } else {
+                                                                refreshHof();
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="text-red-400 hover:text-red-300"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Events/Calendar Section */}
+                    {activeSection === 'calendar' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Add Form */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-6">
+                                <h2 className="font-display font-bold text-xl mb-4">📅 Add Event</h2>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Event Title *</label>
+                                        <input
+                                            type="text"
+                                            value={eventTitle}
+                                            onChange={(e) => setEventTitle(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            placeholder="e.g., Weekly Bingo Night"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Event Type</label>
+                                        <select
+                                            value={eventType}
+                                            onChange={(e) => setEventType(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                        >
+                                            <option value="general">📢 General</option>
+                                            <option value="bingo">🎲 Bingo Event</option>
+                                            <option value="meeting">👥 Meeting</option>
+                                            <option value="pvm">⚔️ PvM Event</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-gray-400 text-sm mb-1 block">Start Date *</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={eventStartDate}
+                                                onChange={(e) => setEventStartDate(e.target.value)}
+                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-gray-400 text-sm mb-1 block">End Date</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={eventEndDate}
+                                                onChange={(e) => setEventEndDate(e.target.value)}
+                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-1 block">Description</label>
+                                        <textarea
+                                            value={eventDescription}
+                                            onChange={(e) => setEventDescription(e.target.value)}
+                                            className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                            rows={3}
+                                            placeholder="Event details..."
+                                        />
+                                    </div>
+                                    
+                                    <button
+                                        onClick={async () => {
+                                            if (!eventTitle || !eventStartDate) {
+                                                alert('Please fill in title and start date');
+                                                return;
+                                            }
+                                            setSaving(true);
+                                            const result = await createEvent({
+                                                title: eventTitle,
+                                                type: eventType,
+                                                startDate: new Date(eventStartDate).toISOString(),
+                                                endDate: eventEndDate ? new Date(eventEndDate).toISOString() : null,
+                                                description: eventDescription
+                                            }, staffPassword);
+                                            setSaving(false);
+                                            if (result.error) {
+                                                alert('Error: ' + result.error);
+                                            } else {
+                                                alert('Event created!');
+                                                setEventTitle('');
+                                                setEventType('general');
+                                                setEventStartDate('');
+                                                setEventEndDate('');
+                                                setEventDescription('');
+                                                refreshEvents();
+                                            }
+                                        }}
+                                        disabled={saving}
+                                        className="w-full py-3 bg-gradient-to-r from-merc-blue to-merc-purple text-white font-display font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                                    >
+                                        {saving ? '⏳ Saving...' : '📅 Create Event'}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Existing Events */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-6">
+                                <h2 className="font-display font-bold text-xl mb-4">📋 Upcoming Events ({events.filter(e => !e.id.startsWith('bounty-')).length})</h2>
+                                
+                                {eventsLoading ? (
+                                    <p className="text-gray-500">Loading...</p>
+                                ) : events.filter(e => !e.id.startsWith('bounty-')).length === 0 ? (
+                                    <p className="text-gray-500">No events scheduled</p>
+                                ) : (
+                                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                                        {events.filter(e => !e.id.startsWith('bounty-')).map(event => (
+                                            <div key={event.id} className="bg-merc-bg rounded-lg p-3">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className={`w-2 h-2 rounded-full ${
+                                                                event.type === 'bingo' ? 'bg-merc-green' : 
+                                                                event.type === 'pvm' ? 'bg-merc-red' :
+                                                                event.type === 'meeting' ? 'bg-merc-blue' : 'bg-merc-accent'
+                                                            }`} />
+                                                            <h3 className="font-bold">{event.title}</h3>
+                                                        </div>
+                                                        <p className="text-gray-400 text-sm">
+                                                            {new Date(event.startDate).toLocaleDateString('en-GB', { 
+                                                                weekday: 'short', 
+                                                                day: 'numeric', 
+                                                                month: 'short',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Delete this event?')) {
+                                                                const result = await deleteEvent(event.id, staffPassword);
+                                                                if (result.error) {
+                                                                    alert('Error: ' + result.error);
+                                                                } else {
+                                                                    refreshEvents();
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="text-red-400 hover:text-red-300"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -2959,9 +3786,598 @@
             );
         }
 
+        // ============ ACTIVITY TICKER ============
+        function ActivityTicker() {
+            const { activity } = useActivity(20);
+
+            if (activity.length === 0) return null;
+
+            const getActivityIcon = (type) => {
+                switch (type) {
+                    case 'bingo_tile': return '🎯';
+                    case 'bingo_win': return '🏆';
+                    case 'bounty_claimed': return '💰';
+                    case 'achievement': return '🎖️';
+                    case 'hall_of_fame': return '⭐';
+                    default: return '📢';
+                }
+            };
+
+            const getActivityColor = (type) => {
+                switch (type) {
+                    case 'bingo_win': return 'text-merc-green';
+                    case 'bounty_claimed': return 'text-merc-accent';
+                    case 'achievement': return 'text-merc-purple';
+                    default: return 'text-gray-300';
+                }
+            };
+
+            // Duplicate for seamless loop
+            const doubledActivity = [...activity, ...activity];
+
+            return (
+                <div className="activity-ticker py-2">
+                    <div className="activity-ticker-content">
+                        {doubledActivity.map((item, i) => (
+                            <div key={i} className="activity-item">
+                                <span>{getActivityIcon(item.type)}</span>
+                                <span className={`font-bold ${getActivityColor(item.type)}`}>{item.player}</span>
+                                <span className="text-gray-400">{item.details}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ COUNTDOWN TIMER ============
+        function CountdownTimer({ targetDate, label }) {
+            const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    const now = new Date().getTime();
+                    const target = new Date(targetDate).getTime();
+                    const diff = target - now;
+
+                    if (diff <= 0) {
+                        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                        return;
+                    }
+
+                    setTimeLeft({
+                        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                        seconds: Math.floor((diff % (1000 * 60)) / 1000)
+                    });
+                }, 1000);
+
+                return () => clearInterval(timer);
+            }, [targetDate]);
+
+            return (
+                <div className="text-center">
+                    {label && <p className="text-gray-400 mb-2">{label}</p>}
+                    <div className="flex justify-center gap-2">
+                        {Object.entries(timeLeft).map(([unit, value]) => (
+                            <div key={unit} className="countdown-unit">
+                                <div className="countdown-number">{String(value).padStart(2, '0')}</div>
+                                <div className="text-gray-500 text-xs uppercase">{unit}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ PLAYER PROFILE MODAL ============
+        function PlayerProfileModal({ playerName, onClose }) {
+            const [profile, setProfile] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const { achievements } = useAchievements();
+
+            useEffect(() => {
+                async function load() {
+                    const data = await fetchPlayerProfile(playerName);
+                    setProfile(data);
+                    setLoading(false);
+                }
+                load();
+            }, [playerName]);
+
+            if (loading) {
+                return (
+                    <div className="fixed inset-0 modal-backdrop flex items-center justify-center z-50" onClick={onClose}>
+                        <div className="bg-merc-card rounded-xl p-8">
+                            <div className="text-center">Loading...</div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const playerAchievements = achievements.filter(a => 
+                profile?.stats?.achievements?.includes(a.id)
+            );
+
+            return (
+                <div className="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4" onClick={onClose}>
+                    <div className="bg-merc-card rounded-xl border border-merc-border max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="p-6">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-4">
+                                    <img 
+                                        src={`https://www.osrsbox.com/osrsbox-db/items-icons/12810.png`}
+                                        alt={playerName}
+                                        className="w-16 h-16 rounded-full border-2 border-merc-accent"
+                                    />
+                                    <div>
+                                        <h2 className="font-display text-2xl font-bold">{profile?.name || playerName}</h2>
+                                        {profile?.wiseOldMan && (
+                                            <p className="text-gray-400">Combat Level: {profile.wiseOldMan.combatLevel || 'N/A'}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl">×</button>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div className="profile-stat-card">
+                                    <div className="profile-stat-value">{profile?.stats?.totalPoints || 0}</div>
+                                    <div className="text-gray-400 text-sm">Total Points</div>
+                                </div>
+                                <div className="profile-stat-card">
+                                    <div className="profile-stat-value">{profile?.stats?.bountiesClaimed || 0}</div>
+                                    <div className="text-gray-400 text-sm">Bounties</div>
+                                </div>
+                                <div className="profile-stat-card">
+                                    <div className="profile-stat-value">{profile?.stats?.bingoWins || 0}</div>
+                                    <div className="text-gray-400 text-sm">Bingo Wins</div>
+                                </div>
+                                <div className="profile-stat-card">
+                                    <div className="profile-stat-value">{profile?.stats?.bingoTilesClaimed || 0}</div>
+                                    <div className="text-gray-400 text-sm">Tiles Claimed</div>
+                                </div>
+                            </div>
+
+                            {/* Achievements */}
+                            <div className="mb-6">
+                                <h3 className="font-bold text-lg mb-3">🎖️ Achievements</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {playerAchievements.length > 0 ? playerAchievements.map(a => (
+                                        <span key={a.id} className="achievement-badge" title={a.description}>
+                                            {a.icon} {a.name}
+                                        </span>
+                                    )) : (
+                                        <span className="text-gray-500">No achievements yet</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* WiseOldMan Stats */}
+                            {profile?.wiseOldMan && (
+                                <div>
+                                    <h3 className="font-bold text-lg mb-3">📊 WiseOldMan Stats</h3>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        {profile.wiseOldMan.latestSnapshot?.data?.skills && (
+                                            <>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-400">Total Level:</span>
+                                                    <span>{Object.values(profile.wiseOldMan.latestSnapshot.data.skills).reduce((a, s) => a + (s.level || 0), 0)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-400">Total XP:</span>
+                                                    <span>{formatNumber(Object.values(profile.wiseOldMan.latestSnapshot.data.skills).reduce((a, s) => a + (s.experience || 0), 0))}</span>
+                                                </div>
+                                            </>
+                                        )}
+                                        {profile.wiseOldMan.latestSnapshot?.data?.bosses && (
+                                            <div className="col-span-2">
+                                                <p className="text-gray-400 mb-2">Top Bosses:</p>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {Object.entries(profile.wiseOldMan.latestSnapshot.data.bosses)
+                                                        .filter(([_, data]) => data.kills > 0)
+                                                        .sort((a, b) => b[1].kills - a[1].kills)
+                                                        .slice(0, 6)
+                                                        .map(([boss, data]) => (
+                                                            <div key={boss} className="flex justify-between bg-merc-bg rounded px-2 py-1">
+                                                                <span className="truncate">{boss.replace(/_/g, ' ')}</span>
+                                                                <span className="text-merc-accent">{formatNumber(data.kills)}</span>
+                                                            </div>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ HALL OF FAME PAGE ============
+        function HallOfFame() {
+            const { items, loading } = useHallOfFame();
+
+            return (
+                <div className="space-y-6 fade-in">
+                    <div className="text-center py-8">
+                        <h1 className="font-display text-4xl font-bold text-glow mb-2">⭐ Hall of Fame</h1>
+                        <p className="text-gray-400">Legendary drops and memorable moments</p>
+                    </div>
+
+                    {loading ? (
+                        <div className="text-center py-12">Loading...</div>
+                    ) : items.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            No entries yet. Check back soon!
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {items.map(item => (
+                                <div key={item.id} className="hof-card rounded-xl overflow-hidden">
+                                    {item.image && (
+                                        <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+                                    )}
+                                    <div className="p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className={`px-2 py-1 rounded text-xs ${
+                                                item.category === 'drop' ? 'bg-merc-accent/20 text-merc-accent' :
+                                                item.category === 'achievement' ? 'bg-merc-purple/20 text-merc-purple' :
+                                                'bg-merc-green/20 text-merc-green'
+                                            }`}>
+                                                {item.category === 'drop' ? '💎 Drop' : item.category === 'achievement' ? '🏆 Achievement' : '📸 Moment'}
+                                            </span>
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-1">{item.title}</h3>
+                                        <p className="text-merc-accent mb-2">by {item.player}</p>
+                                        {item.description && <p className="text-gray-400 text-sm">{item.description}</p>}
+                                        <p className="text-gray-500 text-xs mt-2">{new Date(item.date).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ============ TOOLS PAGE (Calculators) ============
+        function Tools() {
+            const [activeCalc, setActiveCalc] = useState('droprate');
+            
+            // Drop Rate Calculator State
+            const [kc, setKc] = useState('');
+            const [dropRate, setDropRate] = useState('');
+            const [dropResult, setDropResult] = useState(null);
+            
+            // Split Calculator State
+            const [totalGp, setTotalGp] = useState('');
+            const [numPlayers, setNumPlayers] = useState('');
+            const [splitResult, setSplitResult] = useState(null);
+
+            const calculateDropRate = () => {
+                const kills = parseInt(kc);
+                const rate = parseInt(dropRate);
+                if (!kills || !rate) return;
+                
+                const prob = 1 - Math.pow(1 - 1/rate, kills);
+                const expected = kills / rate;
+                const dryStreak = Math.ceil(Math.log(0.01) / Math.log(1 - 1/rate));
+                
+                setDropResult({
+                    probability: (prob * 100).toFixed(2),
+                    expected: expected.toFixed(2),
+                    dryStreak
+                });
+            };
+
+            const calculateSplit = () => {
+                const total = parseFloat(totalGp.replace(/,/g, ''));
+                const players = parseInt(numPlayers);
+                if (!total || !players || players < 1) return;
+                
+                const perPerson = total / players;
+                setSplitResult({
+                    perPerson: Math.floor(perPerson),
+                    total: total,
+                    players: players
+                });
+            };
+
+            return (
+                <div className="space-y-6 fade-in">
+                    <div className="text-center py-8">
+                        <h1 className="font-display text-4xl font-bold text-glow mb-2">🔧 Tools</h1>
+                        <p className="text-gray-400">Handy calculators for OSRS</p>
+                    </div>
+
+                    {/* Calculator Tabs */}
+                    <div className="flex justify-center gap-2">
+                        <button
+                            onClick={() => setActiveCalc('droprate')}
+                            className={`px-6 py-3 rounded-lg font-bold ${activeCalc === 'droprate' ? 'bg-merc-accent text-merc-bg' : 'bg-merc-card border border-merc-border'}`}
+                        >
+                            🎲 Drop Rate
+                        </button>
+                        <button
+                            onClick={() => setActiveCalc('split')}
+                            className={`px-6 py-3 rounded-lg font-bold ${activeCalc === 'split' ? 'bg-merc-accent text-merc-bg' : 'bg-merc-card border border-merc-border'}`}
+                        >
+                            💰 Split Calculator
+                        </button>
+                    </div>
+
+                    <div className="max-w-lg mx-auto">
+                        {activeCalc === 'droprate' ? (
+                            <div className="bg-merc-card rounded-xl border border-merc-border p-6 space-y-4">
+                                <h2 className="font-bold text-xl mb-4">🎲 Drop Rate Calculator</h2>
+                                
+                                <div>
+                                    <label className="text-gray-400 text-sm block mb-1">Kill Count</label>
+                                    <input
+                                        type="number"
+                                        value={kc}
+                                        onChange={e => setKc(e.target.value)}
+                                        className="calc-input"
+                                        placeholder="e.g., 500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-gray-400 text-sm block mb-1">Drop Rate (1 in X)</label>
+                                    <input
+                                        type="number"
+                                        value={dropRate}
+                                        onChange={e => setDropRate(e.target.value)}
+                                        className="calc-input"
+                                        placeholder="e.g., 512"
+                                    />
+                                </div>
+                                
+                                <button
+                                    onClick={calculateDropRate}
+                                    className="w-full py-3 bg-merc-accent text-merc-bg font-bold rounded-lg hover:opacity-90"
+                                >
+                                    Calculate
+                                </button>
+                                
+                                {dropResult && (
+                                    <div className="calc-result space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-400">Chance to have received:</span>
+                                            <span className="font-bold text-merc-green">{dropResult.probability}%</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-400">Expected drops:</span>
+                                            <span className="font-bold">{dropResult.expected}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-400">99% dry streak:</span>
+                                            <span className="font-bold text-merc-red">{dropResult.dryStreak} KC</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="bg-merc-card rounded-xl border border-merc-border p-6 space-y-4">
+                                <h2 className="font-bold text-xl mb-4">💰 Split Calculator</h2>
+                                
+                                <div>
+                                    <label className="text-gray-400 text-sm block mb-1">Total GP</label>
+                                    <input
+                                        type="text"
+                                        value={totalGp}
+                                        onChange={e => setTotalGp(e.target.value)}
+                                        className="calc-input"
+                                        placeholder="e.g., 500000000"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-gray-400 text-sm block mb-1">Number of Players</label>
+                                    <input
+                                        type="number"
+                                        value={numPlayers}
+                                        onChange={e => setNumPlayers(e.target.value)}
+                                        className="calc-input"
+                                        placeholder="e.g., 5"
+                                    />
+                                </div>
+                                
+                                <button
+                                    onClick={calculateSplit}
+                                    className="w-full py-3 bg-merc-accent text-merc-bg font-bold rounded-lg hover:opacity-90"
+                                >
+                                    Calculate Split
+                                </button>
+                                
+                                {splitResult && (
+                                    <div className="calc-result space-y-2">
+                                        <div className="text-center">
+                                            <p className="text-gray-400 mb-1">Each player receives:</p>
+                                            <p className="text-3xl font-bold text-merc-accent">
+                                                {formatNumber(splitResult.perPerson)} GP
+                                            </p>
+                                            <p className="text-gray-500 text-sm mt-2">
+                                                {splitResult.total.toLocaleString()} ÷ {splitResult.players} players
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ CALENDAR PAGE ============
+        function Calendar() {
+            const { events, loading } = useEvents();
+            const [currentMonth, setCurrentMonth] = useState(new Date());
+
+            const getDaysInMonth = (date) => {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const days = [];
+                
+                // Add empty days for start of week
+                for (let i = 0; i < firstDay.getDay(); i++) {
+                    days.push(null);
+                }
+                
+                // Add actual days
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    days.push(new Date(year, month, i));
+                }
+                
+                return days;
+            };
+
+            const days = getDaysInMonth(currentMonth);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const getEventsForDay = (date) => {
+                if (!date) return [];
+                return events.filter(e => {
+                    const start = new Date(e.startDate);
+                    const end = e.endDate ? new Date(e.endDate) : start;
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(23, 59, 59, 999);
+                    return date >= start && date <= end;
+                });
+            };
+
+            return (
+                <div className="space-y-6 fade-in">
+                    <div className="text-center py-8">
+                        <h1 className="font-display text-4xl font-bold text-glow mb-2">📅 Events Calendar</h1>
+                        <p className="text-gray-400">Upcoming clan events and bounty deadlines</p>
+                    </div>
+
+                    {/* Month Navigation */}
+                    <div className="flex justify-center items-center gap-4">
+                        <button 
+                            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                            className="px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:border-merc-accent"
+                        >
+                            ←
+                        </button>
+                        <h2 className="font-display text-2xl font-bold">
+                            {currentMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+                        </h2>
+                        <button 
+                            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                            className="px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:border-merc-accent"
+                        >
+                            →
+                        </button>
+                    </div>
+
+                    {/* Calendar Grid */}
+                    <div className="bg-merc-card rounded-xl border border-merc-border overflow-hidden">
+                        {/* Day Headers */}
+                        <div className="grid grid-cols-7 border-b border-merc-border">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                <div key={day} className="p-2 text-center text-gray-400 font-bold text-sm">
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* Days Grid */}
+                        <div className="grid grid-cols-7">
+                            {days.map((date, i) => {
+                                const dayEvents = getEventsForDay(date);
+                                const isToday = date && date.getTime() === today.getTime();
+                                
+                                return (
+                                    <div 
+                                        key={i} 
+                                        className={`calendar-day ${isToday ? 'today' : ''} ${dayEvents.length > 0 ? 'has-event' : ''}`}
+                                    >
+                                        {date && (
+                                            <>
+                                                <span className={`text-sm ${isToday ? 'text-merc-accent font-bold' : ''}`}>
+                                                    {date.getDate()}
+                                                </span>
+                                                <div className="flex flex-wrap justify-center gap-1 mt-1">
+                                                    {dayEvents.slice(0, 3).map((e, j) => (
+                                                        <div 
+                                                            key={j}
+                                                            className="calendar-event-dot"
+                                                            style={{ background: e.type === 'bingo' ? '#4ade80' : e.type === 'bounty' ? '#e6a919' : '#4a9eff' }}
+                                                            title={e.title}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Upcoming Events List */}
+                    <div className="bg-merc-card rounded-xl border border-merc-border p-6">
+                        <h3 className="font-bold text-lg mb-4">📌 Upcoming Events</h3>
+                        {loading ? (
+                            <p className="text-gray-500">Loading...</p>
+                        ) : events.filter(e => new Date(e.startDate) >= today).length === 0 ? (
+                            <p className="text-gray-500">No upcoming events</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {events
+                                    .filter(e => new Date(e.startDate) >= today)
+                                    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+                                    .slice(0, 5)
+                                    .map(event => (
+                                        <div key={event.id} className="flex items-center gap-4 p-3 bg-merc-bg rounded-lg">
+                                            <div className={`w-3 h-3 rounded-full ${
+                                                event.type === 'bingo' ? 'bg-merc-green' : 
+                                                event.type === 'bounty' ? 'bg-merc-accent' : 'bg-merc-blue'
+                                            }`} />
+                                            <div className="flex-1">
+                                                <p className="font-bold">{event.title}</p>
+                                                <p className="text-gray-400 text-sm">
+                                                    {new Date(event.startDate).toLocaleDateString('en-GB', { 
+                                                        weekday: 'short', 
+                                                        day: 'numeric', 
+                                                        month: 'short' 
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
         // Main App
         function App() {
             const [currentPage, setCurrentPage] = useState('dashboard');
+            const [darkMode, setDarkMode] = useState(true);
+
+            useEffect(() => {
+                if (darkMode) {
+                    document.body.classList.remove('light-mode');
+                } else {
+                    document.body.classList.add('light-mode');
+                }
+            }, [darkMode]);
 
             const renderPage = () => {
                 switch (currentPage) {
@@ -2969,6 +4385,9 @@
                     case 'news': return <News />;
                     case 'bounties': return <Bounties />;
                     case 'leaderboards': return <Leaderboards />;
+                    case 'hall-of-fame': return <HallOfFame />;
+                    case 'calendar': return <Calendar />;
+                    case 'tools': return <Tools />;
                     case 'members': return <Members />;
                     case 'bingo': return <Bingo />;
                     case 'search': return <Search />;
