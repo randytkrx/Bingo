@@ -848,6 +848,38 @@
             return { achievements, loading };
         }
 
+        // ============ IMAGE COMPRESSION ============
+        async function compressImage(file, maxWidth = 1920, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Scale down if larger than maxWidth
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to JPEG with quality setting
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         // ============ HALL OF FAME API ============
         async function fetchHallOfFame() {
             try {
@@ -2673,18 +2705,16 @@
             };
 
             // Handle image upload
-            const handleImageUpload = (e) => {
+            const handleImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    if (file.size > 50000000) { // 500KB limit for localStorage
-                        alert('Image too large! Please use an image under 50000KB.');
+                    if (file.size > 52428800) { // 50MB limit
+                        alert('Image too large! Please use an image under 50MB.');
                         return;
                     }
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        setPosterImage(ev.target.result);
-                    };
-                    reader.readAsDataURL(file);
+                    // Compress image before storing
+                    const compressed = await compressImage(file, 1920, 0.85);
+                    setPosterImage(compressed);
                 }
             };
 
@@ -3339,18 +3369,18 @@
                                     </div>
                                     
                                     <div>
-                                        <label className="text-gray-400 text-sm mb-1 block">Screenshot (max 50000KB)</label>
+                                        <label className="text-gray-400 text-sm mb-1 block">Screenshot (max 50MB, auto-compressed)</label>
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            onChange={(e) => {
+                                            onChange={async (e) => {
                                                 const file = e.target.files[0];
-                                                if (file && file.size < 500000) {
-                                                    const reader = new FileReader();
-                                                    reader.onload = (ev) => setHofImage(ev.target.result);
-                                                    reader.readAsDataURL(file);
+                                                if (file && file.size < 52428800) {
+                                                    // Compress image before storing
+                                                    const compressed = await compressImage(file, 1920, 0.85);
+                                                    setHofImage(compressed);
                                                 } else if (file) {
-                                                    alert('Image too large!');
+                                                    alert('Image too large! Max 50MB.');
                                                 }
                                             }}
                                             className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
@@ -4002,6 +4032,7 @@
         // ============ HALL OF FAME PAGE ============
         function HallOfFame() {
             const { items, loading } = useHallOfFame();
+            const [selectedImage, setSelectedImage] = useState(null);
 
             return (
                 <div className="space-y-6 fade-in">
@@ -4021,7 +4052,12 @@
                             {items.map(item => (
                                 <div key={item.id} className="hof-card rounded-xl overflow-hidden">
                                     {item.image && (
-                                        <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+                                        <img 
+                                            src={item.image} 
+                                            alt={item.title} 
+                                            className="w-full h-48 object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+                                            onClick={() => setSelectedImage({ src: item.image, title: item.title, player: item.player })}
+                                        />
                                     )}
                                     <div className="p-4">
                                         <div className="flex items-center gap-2 mb-2">
@@ -4040,6 +4076,33 @@
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* Image Lightbox Modal */}
+                    {selectedImage && (
+                        <div 
+                            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            <div className="relative max-w-5xl max-h-[90vh] w-full">
+                                <button 
+                                    onClick={() => setSelectedImage(null)}
+                                    className="absolute -top-12 right-0 text-white text-4xl hover:text-merc-accent transition-colors"
+                                >
+                                    ✕
+                                </button>
+                                <img 
+                                    src={selectedImage.src} 
+                                    alt={selectedImage.title}
+                                    className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                <div className="text-center mt-4">
+                                    <h3 className="text-xl font-bold text-white">{selectedImage.title}</h3>
+                                    <p className="text-merc-accent">by {selectedImage.player}</p>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
