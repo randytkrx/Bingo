@@ -2677,7 +2677,7 @@
                 const file = e.target.files[0];
                 if (file) {
                     if (file.size > 50000000) { // 500KB limit for localStorage
-                        alert('Image too large! Please use an image under 500KB.');
+                        alert('Image too large! Please use an image under 50000KB.');
                         return;
                     }
                     const reader = new FileReader();
@@ -3139,7 +3139,7 @@
 
                                     {/* Custom Image Upload */}
                                     <div>
-                                        <label className="text-gray-400 text-sm mb-1 block">Custom Image (optional, max 500KB)</label>
+                                        <label className="text-gray-400 text-sm mb-1 block">Custom Image (optional, max 50000KB)</label>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -3339,7 +3339,7 @@
                                     </div>
                                     
                                     <div>
-                                        <label className="text-gray-400 text-sm mb-1 block">Screenshot (max 500KB)</label>
+                                        <label className="text-gray-400 text-sm mb-1 block">Screenshot (max 50000KB)</label>
                                         <input
                                             type="file"
                                             accept="image/*"
