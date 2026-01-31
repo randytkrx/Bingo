@@ -918,8 +918,14 @@
             teamMode: false,
             teams: null,
             myTeam: null,
-            pendingResetId: null
+            pendingResetId: null,
+            isSpectator: false
         };
+
+        // ============ CHECK URL PARAMETERS ============
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRoom = urlParams.get('room');
+        const urlSpectate = urlParams.get('spectate') === 'true';
 
         // ============ HELPERS ============
         function getItemImage(itemName) {
@@ -973,6 +979,23 @@
         }
 
         document.getElementById('roomInput')?.addEventListener('blur', checkRoomPassword);
+
+        // ============ SPECTATOR MODE ============
+        async function spectateGame(roomId) {
+            try {
+                const res = await fetch(`${API_BASE}/room/${roomId}`);
+                if (!res.ok) {
+                    showToast('Room not found!', 'error');
+                    return;
+                }
+                const data = await res.json();
+                state.isSpectator = true;
+                initializeGame(data, roomId, 'Spectator');
+                showToast('👁️ Spectating - Watch only mode', 'info');
+            } catch (err) {
+                showToast('Failed to connect!', 'error');
+            }
+        }
 
         // ============ JOIN GAME ============
         async function joinGame() {
@@ -1059,7 +1082,22 @@
 
             document.getElementById('joinModal').classList.add('hidden');
             document.getElementById('roomDisplay').textContent = roomId;
-            document.getElementById('playerDisplay').textContent = ign;
+            document.getElementById('playerDisplay').textContent = state.isSpectator ? '👁️ Spectating' : ign;
+
+            // Spectator mode adjustments
+            if (state.isSpectator) {
+                document.getElementById('claimBtn').style.display = 'none';
+                document.querySelector('.btn[onclick="resetGame()"]')?.style.setProperty('display', 'none');
+                // Add spectator badge
+                const header = document.querySelector('.header');
+                if (header && !document.getElementById('spectatorBadge')) {
+                    const badge = document.createElement('div');
+                    badge.id = 'spectatorBadge';
+                    badge.style.cssText = 'background: rgba(74, 158, 255, 0.2); color: #4a9eff; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-left: 16px;';
+                    badge.textContent = '👁️ SPECTATOR MODE';
+                    header.appendChild(badge);
+                }
+            }
 
             // Update grid CSS for board size
             const grid = document.getElementById('bingoGrid');
@@ -1080,8 +1118,8 @@
                 applyCustomCardBackground(state.cardBackground);
             }
 
-            // Check for team mode
-            if (state.teamMode && state.teams) {
+            // Check for team mode (skip for spectators)
+            if (!state.isSpectator && state.teamMode && state.teams) {
                 const existingTeam = state.teams.find(t => t.members && t.members.includes(ign));
                 if (existingTeam) {
                     state.myTeam = existingTeam.id;
@@ -1095,7 +1133,7 @@
             startPolling();
 
             if (state.winner) showWinner(state.winner);
-            showToast(`Joined room: ${roomId} (${state.rows}x${state.cols})`, 'success');
+            showToast(state.isSpectator ? `Spectating room: ${roomId}` : `Joined room: ${roomId} (${state.rows}x${state.cols})`, 'success');
         }
 
         // Apply custom star image to cells
@@ -1220,6 +1258,12 @@
 
         // ============ REVEAL SQUARE ============
         async function revealSquare(squareId) {
+            // Spectators cannot interact
+            if (state.isSpectator) {
+                showToast('👁️ Spectator mode - watch only', 'info');
+                return;
+            }
+
             if (state.activeSquare !== null) {
                 showToast('Complete the current race first!', 'error');
                 return;
@@ -1632,6 +1676,18 @@
                     console.error('Poll error:', err);
                 }
             }, 2000);
+        }
+
+        // ============ AUTO-JOIN FROM URL ============
+        if (urlRoom) {
+            if (urlSpectate) {
+                // Auto-spectate mode
+                spectateGame(urlRoom);
+            } else {
+                // Pre-fill the room code
+                document.getElementById('roomInput').value = urlRoom;
+                showJoinRoom();
+            }
         }
     </script>
 </body>
