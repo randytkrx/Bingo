@@ -7,28 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwindcss.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        merc: {
-                            bg: '#0d0f14',
-                            card: '#141820',
-                            cardHover: '#1a1f2a',
-                            border: '#2a3042',
-                            accent: '#e6a919',
-                            accentDark: '#b8860b',
-                            orange: '#ff6b35',
-                            blue: '#4a9eff',
-                            green: '#4ade80',
-                            purple: '#a855f7',
-                            red: '#ef4444',
+        if (typeof tailwindcss !== 'undefined') {
+            tailwindcss.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            merc: {
+                                bg: '#0d0f14',
+                                card: '#141820',
+                                cardHover: '#1a1f2a',
+                                border: '#2a3042',
+                                accent: '#e6a919',
+                                accentDark: '#b8860b',
+                                orange: '#ff6b35',
+                                blue: '#4a9eff',
+                                green: '#4ade80',
+                                purple: '#a855f7',
+                                red: '#ef4444',
+                            }
+                        },
+                        fontFamily: {
+                            display: ['Cinzel', 'serif'],
+                            body: ['Rajdhani', 'sans-serif'],
+                            tech: ['Orbitron', 'sans-serif'],
                         }
-                    },
-                    fontFamily: {
-                        display: ['Cinzel', 'serif'],
-                        body: ['Rajdhani', 'sans-serif'],
-                        tech: ['Orbitron', 'sans-serif'],
                     }
                 }
             }
@@ -1154,6 +1156,7 @@
                 { id: 'tools', label: 'Tools', icon: '🔧' },
                 { id: 'members', label: 'Members', icon: '👥' },
                 { id: 'bingo', label: 'Bingo', icon: '🎲' },
+                { id: 'race', label: 'Race', icon: '🏁' },
                 { id: 'staff', label: 'Staff', icon: '⚙️' },
             ];
 
@@ -2126,6 +2129,889 @@
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ RACE BOARD PAGE ============
+        const RACE_API = `${CONFIG.bingoApiBase}/race`;
+        
+        // Fetch active race
+        async function fetchRace() {
+            try {
+                const res = await fetch(`${RACE_API}/active`);
+                if (!res.ok) return null;
+                return await res.json();
+            } catch (err) {
+                console.error('Failed to fetch race:', err);
+                return null;
+            }
+        }
+        
+        // Race hook
+        function useRace() {
+            const [race, setRace] = useState(null);
+            const [loading, setLoading] = useState(true);
+            
+            const refresh = async () => {
+                const data = await fetchRace();
+                setRace(data);
+                setLoading(false);
+            };
+            
+            useEffect(() => {
+                refresh();
+                const interval = setInterval(refresh, 30000); // Refresh every 30s
+                return () => clearInterval(interval);
+            }, []);
+            
+            return { race, loading, refresh };
+        }
+        
+        const TEAM_COLORS = {
+            red: { bg: 'bg-red-500', border: 'border-red-500', text: 'text-red-400' },
+            blue: { bg: 'bg-blue-500', border: 'border-blue-500', text: 'text-blue-400' },
+            green: { bg: 'bg-green-500', border: 'border-green-500', text: 'text-green-400' },
+            yellow: { bg: 'bg-yellow-500', border: 'border-yellow-500', text: 'text-yellow-400' },
+            purple: { bg: 'bg-purple-500', border: 'border-purple-500', text: 'text-purple-400' },
+            orange: { bg: 'bg-orange-500', border: 'border-orange-500', text: 'text-orange-400' },
+            pink: { bg: 'bg-pink-500', border: 'border-pink-500', text: 'text-pink-400' },
+            cyan: { bg: 'bg-cyan-500', border: 'border-cyan-500', text: 'text-cyan-400' }
+        };
+        
+        function Race() {
+            const { race, loading, refresh } = useRace();
+            const [selectedTeam, setSelectedTeam] = useState(null);
+            const [fullscreen, setFullscreen] = useState(false);
+            const [showEditor, setShowEditor] = useState(false);
+            const [staffPassword, setStaffPassword] = useState('');
+            const [isAuthed, setIsAuthed] = useState(false);
+            
+            if (loading) {
+                return (
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-merc-accent text-xl">Loading race board...</div>
+                    </div>
+                );
+            }
+            
+            if (!race) {
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h1 className="text-3xl font-display font-bold text-merc-accent">🏁 Race Board</h1>
+                            <button
+                                onClick={() => setShowEditor(true)}
+                                className="px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:border-merc-accent transition-colors"
+                            >
+                                ⚙️ Staff Editor
+                            </button>
+                        </div>
+                        <div className="bg-merc-card border border-merc-border rounded-xl p-8 text-center">
+                            <p className="text-gray-400 text-lg">No active race at the moment.</p>
+                            <p className="text-gray-500 mt-2">Check back later or ask staff to create a new race!</p>
+                        </div>
+                        {showEditor && (
+                            <RaceEditorModal 
+                                race={null} 
+                                onClose={() => setShowEditor(false)} 
+                                onSave={refresh}
+                                staffPassword={staffPassword}
+                                setStaffPassword={setStaffPassword}
+                                isAuthed={isAuthed}
+                                setIsAuthed={setIsAuthed}
+                            />
+                        )}
+                    </div>
+                );
+            }
+            
+            // Calculate tile positions on the board
+            const getTilePosition = (tile) => {
+                return { left: `${tile.x}%`, top: `${tile.y}%` };
+            };
+            
+            // Get teams at a specific tile
+            const getTeamsAtTile = (tileLabel) => {
+                return race.teams?.filter(t => t.currentTile === tileLabel) || [];
+            };
+            
+            // Calculate progress for leaderboard
+            const getTeamProgress = (team) => {
+                if (!team.currentTile || !race.tiles?.length) return 0;
+                const tileIndex = race.tiles.findIndex(t => t.label === team.currentTile);
+                return tileIndex >= 0 ? ((tileIndex + 1) / race.tiles.length) * 100 : 0;
+            };
+            
+            // Sort teams by progress
+            const sortedTeams = [...(race.teams || [])].sort((a, b) => getTeamProgress(b) - getTeamProgress(a));
+            
+            return (
+                <div className="space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <h1 className="text-3xl font-display font-bold text-merc-accent">🏁 {race.title}</h1>
+                            {race.description && <p className="text-gray-400 mt-1">{race.description}</p>}
+                        </div>
+                        <div className="flex gap-2">
+                            <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                                race.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                                race.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
+                                race.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
+                                'bg-gray-500/20 text-gray-400'
+                            }`}>
+                                {race.status?.toUpperCase()}
+                            </span>
+                            <button
+                                onClick={() => setFullscreen(true)}
+                                className="px-3 py-1 bg-merc-card border border-merc-border rounded-lg hover:border-merc-accent transition-colors"
+                            >
+                                🔍 Fullscreen
+                            </button>
+                            <button
+                                onClick={() => setShowEditor(true)}
+                                className="px-3 py-1 bg-merc-card border border-merc-border rounded-lg hover:border-merc-accent transition-colors"
+                            >
+                                ⚙️ Staff
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Board */}
+                        <div className="lg:col-span-2">
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-4">
+                                <div className="relative" style={{ paddingBottom: '75%' }}>
+                                    {race.boardImage ? (
+                                        <img 
+                                            src={race.boardImage} 
+                                            alt="Race Board"
+                                            className="absolute inset-0 w-full h-full object-contain rounded-lg"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 bg-merc-bg rounded-lg flex items-center justify-center">
+                                            <span className="text-gray-500">No board image uploaded</span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Render tiles */}
+                                    {race.tiles?.map((tile, i) => {
+                                        const teamsHere = getTeamsAtTile(tile.label);
+                                        return (
+                                            <div
+                                                key={i}
+                                                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                                                style={getTilePosition(tile)}
+                                                title={`${tile.label}: ${tile.task || 'No task'}`}
+                                            >
+                                                {/* Tile marker */}
+                                                <div className="w-6 h-6 bg-merc-accent/30 border-2 border-merc-accent rounded-full flex items-center justify-center text-xs font-bold">
+                                                    {tile.label}
+                                                </div>
+                                                
+                                                {/* Team pawns */}
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 flex gap-1 mt-1">
+                                                    {teamsHere.map((team, j) => (
+                                                        <div
+                                                            key={team.id}
+                                                            className={`w-5 h-5 rounded-full ${TEAM_COLORS[team.color]?.bg || 'bg-gray-500'} border-2 border-white shadow-lg`}
+                                                            style={{
+                                                                backgroundImage: team.pawnImage ? `url(${team.pawnImage})` : undefined,
+                                                                backgroundSize: 'cover'
+                                                            }}
+                                                            title={`Team ${team.name}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                
+                                                {/* Tooltip on hover */}
+                                                <div className="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-merc-bg border border-merc-border rounded text-xs whitespace-nowrap z-10">
+                                                    <div className="font-bold">{tile.label}</div>
+                                                    <div className="text-gray-400">{tile.task || 'No task'}</div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    
+                                    {/* Teams at start (no tile) */}
+                                    {race.teams?.filter(t => !t.currentTile).length > 0 && (
+                                        <div className="absolute bottom-2 left-2 flex gap-1">
+                                            <span className="text-xs text-gray-500 mr-1">Start:</span>
+                                            {race.teams?.filter(t => !t.currentTile).map(team => (
+                                                <div
+                                                    key={team.id}
+                                                    className={`w-5 h-5 rounded-full ${TEAM_COLORS[team.color]?.bg || 'bg-gray-500'} border-2 border-white shadow-lg`}
+                                                    style={{
+                                                        backgroundImage: team.pawnImage ? `url(${team.pawnImage})` : undefined,
+                                                        backgroundSize: 'cover'
+                                                    }}
+                                                    title={`Team ${team.name}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Sidebar */}
+                        <div className="space-y-4">
+                            {/* Leaderboard */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-4">
+                                <h3 className="font-display font-bold text-lg text-merc-accent mb-3">🏆 Standings</h3>
+                                <div className="space-y-2">
+                                    {sortedTeams.map((team, i) => (
+                                        <div 
+                                            key={team.id}
+                                            className={`p-3 rounded-lg cursor-pointer transition-all ${
+                                                selectedTeam?.id === team.id 
+                                                    ? `bg-merc-bg ${TEAM_COLORS[team.color]?.border || 'border-gray-500'} border-2` 
+                                                    : 'bg-merc-bg/50 hover:bg-merc-bg border border-transparent'
+                                            }`}
+                                            onClick={() => setSelectedTeam(selectedTeam?.id === team.id ? null : team)}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg font-bold text-gray-500">#{i + 1}</span>
+                                                <div 
+                                                    className={`w-4 h-4 rounded-full ${TEAM_COLORS[team.color]?.bg || 'bg-gray-500'}`}
+                                                    style={{
+                                                        backgroundImage: team.pawnImage ? `url(${team.pawnImage})` : undefined,
+                                                        backgroundSize: 'cover'
+                                                    }}
+                                                />
+                                                <span className="font-bold">{team.name}</span>
+                                            </div>
+                                            <div className="mt-2">
+                                                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                                    <span>Position: {team.currentTile || 'Start'}</span>
+                                                    <span>{Math.round(getTeamProgress(team))}%</span>
+                                                </div>
+                                                <div className="h-2 bg-merc-bg rounded-full overflow-hidden">
+                                                    <div 
+                                                        className={`h-full ${TEAM_COLORS[team.color]?.bg || 'bg-gray-500'} transition-all duration-500`}
+                                                        style={{ width: `${getTeamProgress(team)}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {selectedTeam?.id === team.id && (
+                                                <div className="mt-2 pt-2 border-t border-merc-border">
+                                                    <div className="text-xs text-gray-400">Members:</div>
+                                                    <div className="text-sm">{team.members?.join(', ') || 'None'}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {sortedTeams.length === 0 && (
+                                        <p className="text-gray-500 text-center py-4">No teams yet</p>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Recent Submissions */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-4">
+                                <h3 className="font-display font-bold text-lg text-merc-accent mb-3">📋 Recent Activity</h3>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {race.submissions?.slice(-5).reverse().map((sub, i) => (
+                                        <div key={sub.id} className="flex items-center gap-2 text-sm">
+                                            <span className={`w-2 h-2 rounded-full ${
+                                                sub.status === 'approved' ? 'bg-green-500' :
+                                                sub.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
+                                            }`} />
+                                            <span className="text-gray-400">{sub.teamName}</span>
+                                            <span className="text-gray-500">-</span>
+                                            <span className={
+                                                sub.status === 'approved' ? 'text-green-400' :
+                                                sub.status === 'rejected' ? 'text-red-400' : 'text-yellow-400'
+                                            }>{sub.status}</span>
+                                        </div>
+                                    ))}
+                                    {(!race.submissions || race.submissions.length === 0) && (
+                                        <p className="text-gray-500 text-center py-4">No submissions yet</p>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* How to Play */}
+                            <div className="bg-merc-card border border-merc-border rounded-xl p-4">
+                                <h3 className="font-display font-bold text-lg text-merc-accent mb-3">❓ How to Play</h3>
+                                <ol className="text-sm text-gray-400 space-y-2">
+                                    <li>1. Join a team (ask staff)</li>
+                                    <li>2. Complete the task at your tile</li>
+                                    <li>3. Submit proof: <code className="bg-merc-bg px-1 rounded">!race submit</code> in Discord with screenshot</li>
+                                    <li>4. Wait for staff approval</li>
+                                    <li>5. Your team advances!</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Winner Banner */}
+                    {race.winner && (
+                        <div className="bg-gradient-to-r from-yellow-500/20 via-merc-accent/20 to-yellow-500/20 border-2 border-merc-accent rounded-xl p-6 text-center">
+                            <h2 className="text-2xl font-display font-bold text-merc-accent">🎉 Winner: {race.winner}!</h2>
+                            <p className="text-gray-400 mt-2">Congratulations to the winning team!</p>
+                        </div>
+                    )}
+                    
+                    {/* Fullscreen Modal */}
+                    {fullscreen && (
+                        <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4" onClick={() => setFullscreen(false)}>
+                            <button className="absolute top-4 right-4 text-white text-2xl" onClick={() => setFullscreen(false)}>✕</button>
+                            <div className="relative w-full h-full flex items-center justify-center">
+                                {race.boardImage && (
+                                    <img src={race.boardImage} alt="Race Board" className="max-w-full max-h-full object-contain" />
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Staff Editor Modal */}
+                    {showEditor && (
+                        <RaceEditorModal 
+                            race={race} 
+                            onClose={() => setShowEditor(false)} 
+                            onSave={refresh}
+                            staffPassword={staffPassword}
+                            setStaffPassword={setStaffPassword}
+                            isAuthed={isAuthed}
+                            setIsAuthed={setIsAuthed}
+                        />
+                    )}
+                </div>
+            );
+        }
+        
+        // Race Editor Modal Component
+        function RaceEditorModal({ race, onClose, onSave, staffPassword, setStaffPassword, isAuthed, setIsAuthed }) {
+            const [tab, setTab] = useState('setup');
+            const [formData, setFormData] = useState({
+                title: race?.title || 'New Race',
+                description: race?.description || '',
+                status: race?.status || 'draft',
+                boardImage: race?.boardImage || '',
+                tiles: race?.tiles || [],
+                teams: race?.teams || [],
+                discordChannelId: race?.discordChannelId || ''
+            });
+            const [saving, setSaving] = useState(false);
+            const [error, setError] = useState('');
+            const boardRef = useRef(null);
+            
+            // Auth check
+            if (!isAuthed) {
+                return (
+                    <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+                        <div className="bg-merc-card border border-merc-border rounded-xl p-6 max-w-md w-full">
+                            <h2 className="text-xl font-display font-bold text-merc-accent mb-4">🔐 Staff Login</h2>
+                            <input
+                                type="password"
+                                value={staffPassword}
+                                onChange={e => setStaffPassword(e.target.value)}
+                                placeholder="Enter staff password"
+                                className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg focus:border-merc-accent outline-none text-white mb-4"
+                                onKeyDown={e => e.key === 'Enter' && setIsAuthed(true)}
+                            />
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsAuthed(true)}
+                                    className="flex-1 px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-colors"
+                                >
+                                    Login
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2 bg-merc-bg border border-merc-border rounded-lg hover:border-merc-accent transition-colors text-white"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            const handleSave = async () => {
+                setSaving(true);
+                setError('');
+                try {
+                    const method = race?.id ? 'PUT' : 'POST';
+                    const url = race?.id ? `${RACE_API}/${race.id}` : RACE_API;
+                    
+                    // Process teams - convert membersRaw to members array
+                    const processedFormData = {
+                        ...formData,
+                        teams: formData.teams.map(team => ({
+                            ...team,
+                            members: team.membersRaw 
+                                ? team.membersRaw.split(',').map(m => m.trim()).filter(Boolean)
+                                : (team.members || [])
+                        }))
+                    };
+                    
+                    // Remove temporary fields
+                    processedFormData.teams = processedFormData.teams.map(t => {
+                        const { membersRaw, membersText, ...rest } = t;
+                        return rest;
+                    });
+                    
+                    console.log('Saving race:', processedFormData);
+                    
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: staffPassword, race: processedFormData })
+                    });
+                    
+                    const data = await res.json();
+                    console.log('Save response:', data);
+                    
+                    if (data.error) {
+                        setError(data.error);
+                    } else {
+                        onSave();
+                        onClose();
+                    }
+                } catch (err) {
+                    console.error('Save error:', err);
+                    setError('Failed to save race: ' + err.message);
+                }
+                setSaving(false);
+            };
+            
+            const handleBoardClick = (e) => {
+                if (!boardRef.current) return;
+                const rect = boardRef.current.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                const label = prompt('Enter tile label (e.g., 1a, 2b):');
+                if (!label) return;
+                
+                const task = prompt('Enter tile task (what players need to do):');
+                
+                const newTile = {
+                    label: label.trim(),
+                    task: task || '',
+                    x: Math.round(x * 10) / 10,
+                    y: Math.round(y * 10) / 10,
+                    nextTiles: []
+                };
+                
+                setFormData(prev => ({
+                    ...prev,
+                    tiles: [...prev.tiles, newTile]
+                }));
+            };
+            
+            const handleImageUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setFormData(prev => ({ ...prev, boardImage: e.target.result }));
+                };
+                reader.readAsDataURL(file);
+            };
+            
+            const addTeam = () => {
+                const name = prompt('Team name:');
+                if (!name) return;
+                
+                const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
+                const usedColors = formData.teams.map(t => t.color);
+                const availableColor = colors.find(c => !usedColors.includes(c)) || 'red';
+                
+                const newTeam = {
+                    id: `team-${Date.now()}`,
+                    name: name.trim(),
+                    color: availableColor,
+                    pawnImage: '',
+                    members: [],
+                    currentTile: null
+                };
+                
+                setFormData(prev => ({
+                    ...prev,
+                    teams: [...prev.teams, newTeam]
+                }));
+            };
+            
+            const updateTeam = (teamId, updates) => {
+                setFormData(prev => ({
+                    ...prev,
+                    teams: prev.teams.map(t => t.id === teamId ? { ...t, ...updates } : t)
+                }));
+            };
+            
+            const deleteTeam = (teamId) => {
+                if (!confirm('Delete this team?')) return;
+                setFormData(prev => ({
+                    ...prev,
+                    teams: prev.teams.filter(t => t.id !== teamId)
+                }));
+            };
+            
+            const deleteTile = (index) => {
+                setFormData(prev => ({
+                    ...prev,
+                    tiles: prev.tiles.filter((_, i) => i !== index)
+                }));
+            };
+            
+            return (
+                <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-merc-card border border-merc-border rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-[101]">
+                        {/* Header */}
+                        <div className="sticky top-0 bg-merc-card border-b border-merc-border p-4 flex items-center justify-between z-[102]">
+                            <h2 className="text-xl font-display font-bold text-merc-accent">⚙️ Race Editor</h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">✕</button>
+                        </div>
+                        
+                        {/* Tabs */}
+                        <div className="border-b border-merc-border bg-merc-card relative z-[102]">
+                            <div className="flex overflow-x-auto">
+                                {['setup', 'teams', 'board', 'submissions', 'manage'].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => setTab(t)}
+                                        className={`px-4 py-3 font-bold transition-colors whitespace-nowrap ${
+                                            tab === t ? 'text-merc-accent border-b-2 border-merc-accent' : 'text-gray-400 hover:text-white'
+                                        }`}
+                                    >
+                                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-4">
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+                                    {error}
+                                </div>
+                            )}
+                            
+                            {/* Setup Tab */}
+                            {tab === 'setup' && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Race Title</label>
+                                        <input
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                            className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg focus:border-merc-accent outline-none text-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Description</label>
+                                        <textarea
+                                            value={formData.description}
+                                            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                                            rows={3}
+                                            className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg focus:border-merc-accent outline-none text-white resize-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Status</label>
+                                        <select
+                                            value={formData.status}
+                                            onChange={e => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                                            className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg focus:border-merc-accent outline-none text-white"
+                                        >
+                                            <option value="draft">Draft</option>
+                                            <option value="active">Active</option>
+                                            <option value="paused">Paused</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Board Image</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="w-full"
+                                        />
+                                        {formData.boardImage && (
+                                            <img src={formData.boardImage} alt="Board Preview" className="mt-2 max-h-48 rounded-lg" />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Teams Tab */}
+                            {tab === 'teams' && (
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={addTeam}
+                                        className="px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-colors"
+                                    >
+                                        + Add Team
+                                    </button>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {formData.teams.map(team => (
+                                            <div key={team.id} className={`p-4 rounded-lg border-2 ${TEAM_COLORS[team.color]?.border || 'border-gray-500'} bg-merc-bg`}>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <input
+                                                        type="text"
+                                                        value={team.name}
+                                                        onChange={e => updateTeam(team.id, { name: e.target.value })}
+                                                        className="font-bold bg-transparent border-b border-transparent hover:border-gray-500 focus:border-merc-accent outline-none text-white"
+                                                    />
+                                                    <button
+                                                        onClick={() => deleteTeam(team.id)}
+                                                        className="text-red-400 hover:text-red-300"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div>
+                                                        <label className="text-xs text-gray-400">Color</label>
+                                                        <select
+                                                            value={team.color}
+                                                            onChange={e => updateTeam(team.id, { color: e.target.value })}
+                                                            className="w-full px-2 py-1 bg-merc-card border border-merc-border rounded text-sm text-white"
+                                                        >
+                                                            {['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'].map(c => (
+                                                                <option key={c} value={c}>{c}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-400">Members (comma-separated Discord usernames)</label>
+                                                        <input
+                                                            type="text"
+                                                            value={team.membersRaw !== undefined ? team.membersRaw : (team.members?.join(', ') || '')}
+                                                            onChange={e => {
+                                                                const raw = e.target.value;
+                                                                updateTeam(team.id, { 
+                                                                    membersRaw: raw
+                                                                });
+                                                            }}
+                                                            onBlur={e => {
+                                                                const raw = e.target.value;
+                                                                const parsed = raw.split(',').map(m => m.trim()).filter(Boolean);
+                                                                updateTeam(team.id, { 
+                                                                    membersRaw: raw,
+                                                                    members: parsed
+                                                                });
+                                                            }}
+                                                            placeholder="user1, user2, user3"
+                                                            className="w-full px-2 py-1 bg-merc-card border border-merc-border rounded text-sm text-white"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-400">Current Tile</label>
+                                                        <select
+                                                            value={team.currentTile || ''}
+                                                            onChange={e => updateTeam(team.id, { currentTile: e.target.value || null })}
+                                                            className="w-full px-2 py-1 bg-merc-card border border-merc-border rounded text-sm text-white"
+                                                        >
+                                                            <option value="">Start</option>
+                                                            {formData.tiles.map(t => (
+                                                                <option key={t.label} value={t.label}>{t.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Board Tab */}
+                            {tab === 'board' && (
+                                <div className="space-y-4">
+                                    <p className="text-gray-400 text-sm">Click on the board image to place tiles. Each tile represents a stop in the race.</p>
+                                    <div 
+                                        ref={boardRef}
+                                        className="relative border border-merc-border rounded-lg overflow-hidden cursor-crosshair"
+                                        style={{ paddingBottom: '75%' }}
+                                        onClick={handleBoardClick}
+                                    >
+                                        {formData.boardImage ? (
+                                            <img 
+                                                src={formData.boardImage} 
+                                                alt="Board" 
+                                                className="absolute inset-0 w-full h-full object-contain"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-merc-bg flex items-center justify-center">
+                                                <span className="text-gray-500">Upload a board image in Setup tab</span>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Placed tiles */}
+                                        {formData.tiles.map((tile, i) => (
+                                            <div
+                                                key={i}
+                                                className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
+                                                style={{ left: `${tile.x}%`, top: `${tile.y}%` }}
+                                                onClick={e => e.stopPropagation()}
+                                            >
+                                                <div className="w-6 h-6 bg-merc-accent border-2 border-white rounded-full flex items-center justify-center text-xs font-bold text-black">
+                                                    {tile.label}
+                                                </div>
+                                                <button
+                                                    onClick={() => deleteTile(i)}
+                                                    className="hidden group-hover:block absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full text-xs text-white"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    {/* Tile list */}
+                                    <div className="space-y-2">
+                                        <h4 className="font-bold text-gray-400">Tiles ({formData.tiles.length})</h4>
+                                        {formData.tiles.map((tile, i) => (
+                                            <div key={i} className="flex items-center gap-2 p-2 bg-merc-bg rounded">
+                                                <span className="font-bold text-merc-accent w-12">{tile.label}</span>
+                                                <input
+                                                    type="text"
+                                                    value={tile.task}
+                                                    onChange={e => {
+                                                        const newTiles = [...formData.tiles];
+                                                        newTiles[i].task = e.target.value;
+                                                        setFormData(prev => ({ ...prev, tiles: newTiles }));
+                                                    }}
+                                                    placeholder="Task description"
+                                                    className="flex-1 px-2 py-1 bg-merc-card border border-merc-border rounded text-sm text-white"
+                                                />
+                                                <button
+                                                    onClick={() => deleteTile(i)}
+                                                    className="text-red-400 hover:text-red-300"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Submissions Tab */}
+                            {tab === 'submissions' && (
+                                <div className="space-y-4">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm">
+                                            <thead>
+                                                <tr className="border-b border-merc-border">
+                                                    <th className="text-left p-2 text-gray-400">ID</th>
+                                                    <th className="text-left p-2 text-gray-400">Team</th>
+                                                    <th className="text-left p-2 text-gray-400">User</th>
+                                                    <th className="text-left p-2 text-gray-400">Tile</th>
+                                                    <th className="text-left p-2 text-gray-400">Status</th>
+                                                    <th className="text-left p-2 text-gray-400">Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {race?.submissions?.map(sub => (
+                                                    <tr key={sub.id} className="border-b border-merc-border/50">
+                                                        <td className="p-2 font-mono text-xs">{sub.id}</td>
+                                                        <td className="p-2">{sub.teamName}</td>
+                                                        <td className="p-2">{sub.discordUsername}</td>
+                                                        <td className="p-2">{sub.tileLabel}</td>
+                                                        <td className="p-2">
+                                                            <span className={`px-2 py-1 rounded text-xs ${
+                                                                sub.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                                                                sub.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                                                                'bg-yellow-500/20 text-yellow-400'
+                                                            }`}>
+                                                                {sub.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-2 text-gray-400">{new Date(sub.createdAt).toLocaleString()}</td>
+                                                    </tr>
+                                                ))}
+                                                {(!race?.submissions || race.submissions.length === 0) && (
+                                                    <tr>
+                                                        <td colSpan={6} className="p-4 text-center text-gray-500">No submissions yet</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Manage Tab */}
+                            {tab === 'manage' && (
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-merc-bg rounded-lg">
+                                        <h4 className="font-bold mb-2">Declare Winner</h4>
+                                        <select
+                                            value={formData.winner || ''}
+                                            onChange={e => setFormData(prev => ({ ...prev, winner: e.target.value || null }))}
+                                            className="w-full px-4 py-2 bg-merc-card border border-merc-border rounded-lg text-white"
+                                        >
+                                            <option value="">No winner yet</option>
+                                            {formData.teams.map(t => (
+                                                <option key={t.id} value={t.name}>{t.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                                        <h4 className="font-bold text-red-400 mb-2">Danger Zone</h4>
+                                        <button
+                                            onClick={async () => {
+                                                if (!confirm('Reset all team positions to Start?')) return;
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    teams: prev.teams.map(t => ({ ...t, currentTile: null }))
+                                                }));
+                                            }}
+                                            className="px-4 py-2 bg-red-500/20 border border-red-500 text-red-400 rounded-lg mr-2"
+                                        >
+                                            Reset Positions
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!confirm('DELETE this entire race? This cannot be undone!')) return;
+                                                const res = await fetch(`${RACE_API}/${race.id}`, {
+                                                    method: 'DELETE',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ password: staffPassword })
+                                                });
+                                                if (res.ok) {
+                                                    onSave();
+                                                    onClose();
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg"
+                                        >
+                                            Delete Race
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Footer */}
+                        <div className="sticky bottom-0 bg-merc-card border-t border-merc-border p-4 flex justify-end gap-2">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-merc-bg border border-merc-border rounded-lg hover:border-merc-accent transition-colors text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50"
+                            >
+                                {saving ? 'Saving...' : 'Save Race'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
@@ -4654,6 +5540,7 @@
                     case 'tools': return <Tools />;
                     case 'members': return <Members />;
                     case 'bingo': return <Bingo />;
+                    case 'race': return <Race />;
                     case 'search': return <Search />;
                     case 'staff': return <Staff />;
                     default: return <Dashboard setCurrentPage={setCurrentPage} />;
@@ -4667,12 +5554,12 @@
                     <div className="bg-overlay"></div>
                     
                     <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-                    <main className="pt-20 pb-12 px-4 max-w-7xl mx-auto relative z-10">
+                    <main className="pt-20 pb-12 px-4 max-w-7xl mx-auto relative">
                         {renderPage()}
                     </main>
                     
                     {/* Footer */}
-                    <footer className="border-t border-merc-border py-6 text-center relative z-10">
+                    <footer className="border-t border-merc-border py-6 text-center">
                         <p className="text-gray-500 font-body text-sm">
                             © 2025 {CONFIG.clanName} • Built with ❤️ for the OSRS community
                         </p>
