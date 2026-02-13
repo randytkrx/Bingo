@@ -6156,10 +6156,9 @@
                 CATEGORY_ORDER.forEach(category => {
                     if (selectedCategory !== 'all' && selectedCategory !== category) return;
                     
-                    const categoryGuideIds = guidesData.categories?.[category] || [];
-                    const categoryGuides = categoryGuideIds
-                        .map(id => guidesData.guides?.find(g => g.id === id))
-                        .filter(Boolean)
+                    // Filter guides by their actual category field (not the static categories mapping)
+                    const categoryGuides = (guidesData.guides || [])
+                        .filter(guide => guide.category === category)
                         .filter(guide => 
                             guide.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             guide.description?.toLowerCase().includes(searchTerm.toLowerCase())
