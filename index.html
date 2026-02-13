@@ -336,15 +336,19 @@
             margin: 0;
         }
 
-        /* Rank Colors */
-        .rank-owner { color: #ff6b35; }
-        .rank-deputy { color: #a855f7; }
-        .rank-general { color: #4a9eff; }
-        .rank-captain { color: #4ade80; }
-        .rank-lieutenant { color: #facc15; }
-        .rank-sergeant { color: #f97316; }
-        .rank-corporal { color: #94a3b8; }
-        .rank-recruit { color: #64748b; }
+        /* Rank Colors - OSRS gem inspired */
+        .rank-staff { color: #ff6b35; font-weight: 600; }
+        .rank-wrath { color: #a855f7; font-weight: 600; }
+        .rank-zenyte { color: #e6a919; font-weight: 600; }
+        .rank-onyx { color: #a1a1aa; font-weight: 600; }
+        .rank-dragonstone { color: #ec4899; font-weight: 600; }
+        .rank-beast { color: #22c55e; font-weight: 600; }
+        .rank-1nana { color: #fbbf24; font-weight: 600; }
+        .rank-2nana { color: #fbbf24; font-weight: 600; }
+        .rank-3nana { color: #fbbf24; font-weight: 600; }
+        .rank-serenist { color: #22d3ee; font-weight: 600; }
+        .rank-anchor { color: #6366f1; font-weight: 600; }
+        .rank-trialist { color: #94a3b8; font-weight: 600; }
 
         /* Bounty/Wanted Poster Styles */
         .bounty-card {
@@ -1101,14 +1105,18 @@
 
         const getRankColor = (rank) => {
             const colors = {
-                'owner': 'rank-owner',
-                'deputy owner': 'rank-deputy',
-                'general': 'rank-general',
-                'captain': 'rank-captain',
-                'lieutenant': 'rank-lieutenant',
-                'sergeant': 'rank-sergeant',
-                'corporal': 'rank-corporal',
-                'recruit': 'rank-recruit',
+                'staff': 'rank-staff',
+                'wrath': 'rank-wrath',
+                'zenyte': 'rank-zenyte',
+                'onyx': 'rank-onyx',
+                'dragonstone': 'rank-dragonstone',
+                'beast': 'rank-beast',
+                '1 nana': 'rank-1nana',
+                '2 nana': 'rank-2nana',
+                '3 nana': 'rank-3nana',
+                'serenist': 'rank-serenist',
+                'anchor': 'rank-anchor',
+                'trialist': 'rank-trialist',
             };
             return colors[rank?.toLowerCase()] || 'text-gray-400';
         };
@@ -1796,44 +1804,89 @@
             const { data: frontPageData, loading } = useSheetData('Front Page!A2:H1000');
             const [search, setSearch] = useState('');
             const [selectedMember, setSelectedMember] = useState(null);
+            const [filterRank, setFilterRank] = useState('all');
 
-            const members = frontPageData
-                .map(row => {
-                    const parsed = parsePlayerName(row[0]?.trim());
-                    return {
-                        name: row[0]?.trim(),
+            // Rank section headers in the spreadsheet
+            const RANK_HEADERS = ['staff', 'wrath', 'zenyte', 'onyx', 'dragonstone', 'beast', '1 nana', '2 nana', '3 nana', 'serenist', 'anchor', 'trialist'];
+
+            // Parse members with rank detection from section headers
+            const members = (() => {
+                const result = [];
+                let currentRank = 'Member';
+
+                for (const row of frontPageData) {
+                    const firstCell = row[0]?.trim();
+                    if (!firstCell) continue;
+
+                    // Check if this row is a rank header
+                    const isRankHeader = RANK_HEADERS.includes(firstCell.toLowerCase());
+                    
+                    if (isRankHeader) {
+                        currentRank = firstCell;
+                        continue;
+                    }
+
+                    // Skip rows that look like headers or empty data
+                    if (firstCell.toLowerCase() === 'name' || firstCell.toLowerCase() === 'reserved') continue;
+
+                    const parsed = parsePlayerName(firstCell);
+                    
+                    // Skip ignored names
+                    if (IGNORED_NAMES.includes(parsed.main)) continue;
+
+                    result.push({
+                        name: firstCell,
                         mainName: parsed.main,
                         altName: parsed.alt,
                         hasAlt: parsed.hasAlt,
                         region: row[1] || 'Unknown',
                         joinDate: row[2] || 'N/A',
                         daysInClan: row[3] || '0',
-                        rank: row[4] || 'Member',
+                        rank: currentRank,
                         splits: row[5] || '0',
                         drops: row[6] || '0',
                         diaryPoints: row[7] || '0',
-                    };
-                })
-                .filter(m => m.mainName && !IGNORED_NAMES.includes(m.mainName));
+                    });
+                }
 
-            const filteredMembers = members.filter(m => 
-                m.mainName.toLowerCase().includes(search.toLowerCase()) ||
-                (m.altName && m.altName.toLowerCase().includes(search.toLowerCase()))
-            );
+                return result;
+            })();
+
+            // Get unique ranks for filter
+            const uniqueRanks = [...new Set(members.map(m => m.rank))];
+
+            const filteredMembers = members.filter(m => {
+                const matchesSearch = m.mainName.toLowerCase().includes(search.toLowerCase()) ||
+                    (m.altName && m.altName.toLowerCase().includes(search.toLowerCase()));
+                const matchesRank = filterRank === 'all' || m.rank.toLowerCase() === filterRank.toLowerCase();
+                return matchesSearch && matchesRank;
+            });
 
             return (
                 <div className="space-y-6 fade-in">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <h1 className="font-display text-3xl font-bold">👥 Clan Members</h1>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search members..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full sm:w-64 bg-merc-card border border-merc-border rounded-lg px-4 py-2 pl-10 font-body text-white placeholder-gray-500 focus:outline-none focus:border-merc-accent"
-                            />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                        <div className="flex gap-3">
+                            <select
+                                value={filterRank}
+                                onChange={(e) => setFilterRank(e.target.value)}
+                                className="bg-merc-card border border-merc-border rounded-lg px-3 py-2 font-body text-white focus:outline-none focus:border-merc-accent"
+                            >
+                                <option value="all">All Ranks</option>
+                                {uniqueRanks.map(rank => (
+                                    <option key={rank} value={rank}>{rank}</option>
+                                ))}
+                            </select>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search members..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full sm:w-64 bg-merc-card border border-merc-border rounded-lg px-4 py-2 pl-10 font-body text-white placeholder-gray-500 focus:outline-none focus:border-merc-accent"
+                                />
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                            </div>
                         </div>
                     </div>
 
@@ -3991,6 +4044,16 @@
                         >
                             📚 Guides
                         </button>
+                        <button
+                            onClick={() => setActiveSection('activity')}
+                            className={`px-4 py-2 rounded-lg font-body font-semibold ${
+                                activeSection === 'activity' 
+                                    ? 'bg-merc-accent/20 text-merc-accent' 
+                                    : 'bg-merc-card text-gray-400'
+                            }`}
+                        >
+                            📢 Activity Log
+                        </button>
                         <a
                             href="admin.html"
                             className="px-4 py-2 rounded-lg font-body font-semibold bg-merc-card text-gray-400 hover:bg-merc-orange/20 hover:text-merc-orange transition-colors"
@@ -4745,6 +4808,155 @@
                     {activeSection === 'guides' && (
                         <div>
                             <RichTextGuideEditor staffPassword={staffPassword} />
+                        </div>
+                    )}
+
+                    {activeSection === 'activity' && (
+                        <div className="bg-merc-card border border-merc-border rounded-xl p-6">
+                            <h2 className="font-display font-bold text-xl mb-4">📢 Activity Log</h2>
+                            <p className="text-gray-400 mb-4">View and manage activity entries. Delete unwanted entries from the activity feed.</p>
+                            
+                            <ActivityManager staffPassword={staffPassword} />
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+
+        // ============ ACTIVITY MANAGER (Staff) ============
+        function ActivityManager({ staffPassword }) {
+            const [activities, setActivities] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [filterType, setFilterType] = useState('all');
+            const [deleting, setDeleting] = useState(null);
+
+            const loadActivities = async () => {
+                try {
+                    const res = await fetch(`${CONFIG.bingoApiBase}/activity?limit=100`);
+                    const data = await res.json();
+                    setActivities(data || []);
+                } catch (err) {
+                    console.error('Failed to load activities:', err);
+                }
+                setLoading(false);
+            };
+
+            useEffect(() => {
+                loadActivities();
+            }, []);
+
+            const deleteActivity = async (id) => {
+                if (!confirm('Are you sure you want to delete this activity entry?')) return;
+                
+                setDeleting(id);
+                try {
+                    const res = await fetch(`${CONFIG.bingoApiBase}/activity/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: staffPassword })
+                    });
+                    
+                    if (res.ok) {
+                        setActivities(prev => prev.filter(a => a.id !== id));
+                    } else {
+                        alert('Failed to delete activity');
+                    }
+                } catch (err) {
+                    alert('Error deleting activity');
+                }
+                setDeleting(null);
+            };
+
+            const getActivityIcon = (type) => {
+                switch (type) {
+                    case 'bingo_tile': return '🎯';
+                    case 'bingo_win': return '🏆';
+                    case 'bounty_claimed': return '💰';
+                    case 'achievement': return '🎖️';
+                    case 'hall_of_fame': return '⭐';
+                    case 'guides': return '📚';
+                    case 'race': return '🏁';
+                    default: return '📢';
+                }
+            };
+
+            const getTypeColor = (type) => {
+                switch (type) {
+                    case 'bingo_win': return 'text-green-400';
+                    case 'bounty_claimed': return 'text-merc-accent';
+                    case 'achievement': return 'text-purple-400';
+                    case 'guides': return 'text-blue-400';
+                    case 'race': return 'text-orange-400';
+                    default: return 'text-gray-300';
+                }
+            };
+
+            const activityTypes = ['all', 'bingo_tile', 'bingo_win', 'bounty_claimed', 'achievement', 'hall_of_fame', 'guides', 'race'];
+            
+            const filteredActivities = filterType === 'all' 
+                ? activities 
+                : activities.filter(a => a.type === filterType);
+
+            if (loading) {
+                return <div className="text-center py-8"><div className="spinner"></div></div>;
+            }
+
+            return (
+                <div className="space-y-4">
+                    {/* Filter */}
+                    <div className="flex items-center gap-4 flex-wrap">
+                        <label className="text-gray-400">Filter by type:</label>
+                        <select 
+                            value={filterType} 
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="bg-merc-bg border border-merc-border rounded-lg px-3 py-2 text-white"
+                        >
+                            {activityTypes.map(type => (
+                                <option key={type} value={type}>
+                                    {type === 'all' ? '📋 All Types' : `${getActivityIcon(type)} ${type.replace('_', ' ')}`}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-gray-500">({filteredActivities.length} entries)</span>
+                        <button 
+                            onClick={loadActivities}
+                            className="ml-auto px-3 py-2 bg-merc-bg border border-merc-border rounded-lg hover:border-merc-accent transition-colors"
+                        >
+                            🔄 Refresh
+                        </button>
+                    </div>
+
+                    {/* Activity List */}
+                    <div className="max-h-[600px] overflow-y-auto space-y-2">
+                        {filteredActivities.map((activity) => (
+                            <div 
+                                key={activity.id} 
+                                className="flex items-center gap-3 p-3 bg-merc-bg rounded-lg border border-merc-border hover:border-merc-border/80"
+                            >
+                                <span className="text-xl">{getActivityIcon(activity.type)}</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`font-bold ${getTypeColor(activity.type)}`}>{activity.player}</span>
+                                        <span className="text-xs text-gray-500 bg-merc-card px-2 py-0.5 rounded">{activity.type}</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm truncate">{activity.details}</p>
+                                    <p className="text-gray-600 text-xs">{new Date(activity.timestamp).toLocaleString()}</p>
+                                </div>
+                                <button
+                                    onClick={() => deleteActivity(activity.id)}
+                                    disabled={deleting === activity.id}
+                                    className="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                                >
+                                    {deleting === activity.id ? '...' : '🗑️'}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {filteredActivities.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            No activities found for this filter.
                         </div>
                     )}
                 </div>
