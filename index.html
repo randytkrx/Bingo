@@ -1641,11 +1641,25 @@
             const { data: frontPageData, loading: fpLoading } = useSheetData('Front Page!A2:H1000');
             const { data: splitsData, loading: splitsLoading } = useSheetData('Clan splits!A2:B1000');
             const { data: diaryData, loading: diaryLoading } = useSheetData('Diary Points!A2:C1000');
+            const [bountiesData, setBountiesData] = useState([]);
+            const [bountiesLoading, setBountiesLoading] = useState(true);
+
+            // Fetch bounties leaderboard from API
+            useEffect(() => {
+                fetch(`${CONFIG.bingoApiBase}/leaderboard?type=bounties`)
+                    .then(res => res.json())
+                    .then(data => {
+                        setBountiesData(data || []);
+                        setBountiesLoading(false);
+                    })
+                    .catch(() => setBountiesLoading(false));
+            }, []);
 
             const tabs = [
                 { id: 'splits', label: '💰 Splits', color: 'merc-green' },
                 { id: 'drops', label: '🎯 Drops', color: 'merc-accent' },
                 { id: 'diary', label: '📘 Diary Points', color: 'merc-blue' },
+                { id: 'bounties', label: '🎪 Bounties', color: 'merc-orange' },
             ];
 
             const splitsLeaderboard = splitsData
@@ -1673,13 +1687,14 @@
                 .filter(e => e.name && !IGNORED_NAMES.includes(e.name))
                 .sort((a, b) => b.value - a.value);
 
-            const loading = fpLoading || splitsLoading || diaryLoading;
+            const loading = fpLoading || splitsLoading || diaryLoading || (activeTab === 'bounties' && bountiesLoading);
 
             const getLeaderboard = () => {
                 switch (activeTab) {
                     case 'splits': return splitsLeaderboard;
                     case 'drops': return dropsLeaderboard.map(d => ({ name: d.name, value: d.drops }));
                     case 'diary': return diaryLeaderboard;
+                    case 'bounties': return bountiesData.map(p => ({ name: p.name, value: p.bountiesClaimed }));
                     default: return [];
                 }
             };
@@ -1689,6 +1704,7 @@
                     case 'splits': return 'M GP';
                     case 'drops': return ' drops';
                     case 'diary': return ' pts';
+                    case 'bounties': return ' claimed';
                     default: return '';
                 }
             };
