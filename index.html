@@ -4942,7 +4942,17 @@
         function ActivityTicker() {
             const { activity } = useActivity(20);
 
-            if (activity.length === 0) return null;
+            // Filter out unwanted activity types
+            const HIDDEN_ACTIVITY_TYPES = ['guides']; // Add types to hide here
+            const filteredActivity = activity.filter(item => {
+                // Hide certain activity types entirely
+                if (HIDDEN_ACTIVITY_TYPES.includes(item.type)) return false;
+                // Hide expired bounties (player name is "Expired")
+                if (item.type === 'bounty_claimed' && item.player?.toLowerCase() === 'expired') return false;
+                return true;
+            });
+
+            if (filteredActivity.length === 0) return null;
 
             const getActivityIcon = (type) => {
                 switch (type) {
@@ -4965,7 +4975,7 @@
             };
 
             // Duplicate for seamless loop
-            const doubledActivity = [...activity, ...activity];
+            const doubledActivity = [...filteredActivity, ...filteredActivity];
 
             return (
                 <div className="activity-ticker py-2">
