@@ -50,6 +50,81 @@
             min-height: 100vh;
         }
 
+        /* Guide Content Styles */
+        .guide-content {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .guide-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+            border: 1px solid #2a3042;
+        }
+        .guide-content h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #e6a919;
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2a3042;
+        }
+        .guide-content h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 20px 0 10px 0;
+        }
+        .guide-content h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 16px 0 8px 0;
+        }
+        .guide-content p {
+            margin: 12px 0;
+            line-height: 1.7;
+        }
+        .guide-content a {
+            color: #4a9eff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .guide-content a:hover {
+            color: #e6a919;
+            text-decoration: underline;
+        }
+        .guide-content strong {
+            color: #e6a919;
+            font-weight: 600;
+        }
+        .guide-content code, .guide-content pre {
+            background: #0d0f14;
+            border: 1px solid #2a3042;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .guide-content pre {
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .guide-content ul, .guide-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .guide-content li {
+            margin: 6px 0;
+        }
+        .guide-content span[style*="text-decoration:underline"] {
+            text-decoration: underline;
+            text-decoration-color: #e6a919;
+        }
+
         /* Fixed Background Image */
         .bg-inferno {
             position: fixed;
@@ -330,7 +405,7 @@
         }
         .activity-ticker-content {
             display: inline-flex;
-            animation: ticker 60s linear infinite;
+            animation: ticker 30s linear infinite;
         }
         .activity-ticker-content:hover {
             animation-play-state: paused;
@@ -851,29 +926,25 @@
         }
 
         // ============ IMAGE COMPRESSION ============
-        async function compressImage(file, maxWidth = 1920, quality = 0.8) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        // Scale down if larger than maxWidth
+        function compressImage(file, maxWidth, quality) {
+            if (!maxWidth) maxWidth = 1920;
+            if (!quality) quality = 0.8;
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var width = img.width;
+                        var height = img.height;
                         if (width > maxWidth) {
-                            height = (height * maxWidth) / width;
+                            height = Math.floor((height * maxWidth) / width);
                             width = maxWidth;
                         }
-                        
                         canvas.width = width;
                         canvas.height = height;
-                        
-                        const ctx = canvas.getContext('2d');
+                        var ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Convert to JPEG with quality setting
                         resolve(canvas.toDataURL('image/jpeg', quality));
                     };
                     img.src = e.target.result;
@@ -1157,6 +1228,7 @@
                 { id: 'members', label: 'Members', icon: '👥' },
                 { id: 'bingo', label: 'Bingo', icon: '🎲' },
                 { id: 'race', label: 'Race', icon: '🏁' },
+                { id: 'guides', label: 'Guides', icon: '📚' },
                 { id: 'staff', label: 'Staff', icon: '⚙️' },
             ];
 
@@ -1531,6 +1603,7 @@
                                         title={poster.title}
                                         goal={poster.goal}
                                         reward={poster.reward}
+                                        rewardType={poster.rewardType}
                                         status={poster.status}
                                         style={poster.style}
                                         winner={poster.winner}
@@ -3280,6 +3353,7 @@
                                     title={poster.title}
                                     goal={poster.goal}
                                     reward={poster.reward}
+                                    rewardType={poster.rewardType}
                                     status={poster.status}
                                     style={poster.style}
                                     winner={poster.winner}
@@ -3517,6 +3591,7 @@
             const [posterTitle, setPosterTitle] = useState('');
             const [posterGoal, setPosterGoal] = useState('');
             const [posterReward, setPosterReward] = useState('');
+            const [posterRewardType, setPosterRewardType] = useState('gp');
             const [posterStatus, setPosterStatus] = useState('open');
             const [posterHost, setPosterHost] = useState('');
             const [posterWinner, setPosterWinner] = useState('');
@@ -3564,6 +3639,7 @@
                     setPosterTitle(editingPoster.title);
                     setPosterGoal(editingPoster.goal);
                     setPosterReward(editingPoster.reward);
+                    setPosterRewardType(editingPoster.rewardType || 'gp');
                     setPosterStatus(editingPoster.status);
                     setPosterStyle(editingPoster.style);
                     setPosterHost(editingPoster.host || '');
@@ -3665,6 +3741,7 @@
                 setPosterTitle('');
                 setPosterGoal('');
                 setPosterReward('');
+                setPosterRewardType('gp');
                 setPosterStatus('open');
                 setPosterStyle('classic');
                 setPosterHost('');
@@ -3703,6 +3780,7 @@
                     title: posterTitle,
                     goal: posterGoal,
                     reward: posterReward,
+                    rewardType: posterRewardType,
                     status: posterStatus,
                     style: posterStyle,
                     host: posterHost,
@@ -3887,6 +3965,16 @@
                         >
                             📅 Events
                         </button>
+                        <button
+                            onClick={() => setActiveSection('guides')}
+                            className={`px-4 py-2 rounded-lg font-body font-semibold ${
+                                activeSection === 'guides' 
+                                    ? 'bg-merc-accent/20 text-merc-accent' 
+                                    : 'bg-merc-card text-gray-400'
+                            }`}
+                        >
+                            📚 Guides
+                        </button>
                         <a
                             href="admin.html"
                             className="px-4 py-2 rounded-lg font-body font-semibold bg-merc-card text-gray-400 hover:bg-merc-orange/20 hover:text-merc-orange transition-colors"
@@ -4052,14 +4140,24 @@
                                     
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="text-gray-400 text-sm mb-1 block">Reward (M) *</label>
-                                            <input
-                                                type="number"
-                                                value={posterReward}
-                                                onChange={(e) => setPosterReward(e.target.value)}
-                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
-                                                placeholder="50"
-                                            />
+                                            <label className="text-gray-400 text-sm mb-1 block">Reward *</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="number"
+                                                    value={posterReward}
+                                                    onChange={(e) => setPosterReward(e.target.value)}
+                                                    className="flex-1 bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                                    placeholder="50"
+                                                />
+                                                <select
+                                                    value={posterRewardType}
+                                                    onChange={(e) => setPosterRewardType(e.target.value)}
+                                                    className="bg-merc-bg border border-merc-border rounded-lg px-3 py-2 text-white"
+                                                >
+                                                    <option value="gp">M GP</option>
+                                                    <option value="points">Points</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         
                                         <div>
@@ -4196,6 +4294,7 @@
                                     title={posterTitle || 'Bounty Title'}
                                     goal={posterGoal || 'Complete the objective to claim the reward'}
                                     reward={posterReward || '0'}
+                                    rewardType={posterRewardType}
                                     status={posterStatus}
                                     style={posterStyle}
                                     host={posterHost}
@@ -4626,12 +4725,18 @@
                             </div>
                         </div>
                     )}
+
+                    {activeSection === 'guides' && (
+                        <div>
+                            <RichTextGuideEditor staffPassword={staffPassword} />
+                        </div>
+                    )}
                 </div>
             );
         }
 
         // Wanted Poster Component (reusable)
-        function WantedPoster({ id, title, goal, reward, status, style = 'classic', winner, host, date, image }) {
+        function WantedPoster({ id, title, goal, reward, rewardType = 'gp', status, style = 'classic', winner, host, date, image }) {
             const isOpen = status === 'open';
             
             const styleClasses = {
@@ -4777,7 +4882,7 @@
                             color: style === 'classic' ? '#8b0000' : style === 'dark' ? '#ff6b35' : '#ff0000',
                             textShadow: style === 'bloody' ? '0 0 10px rgba(255,0,0,0.5)' : 'none'
                         }}>
-                            {reward}<span style={{ fontSize: '1.2rem', color: '#d4af37' }}>M GP</span>
+                            {reward}<span style={{ fontSize: '1.2rem', color: rewardType === 'points' ? '#a855f7' : '#d4af37' }}>{rewardType === 'points' ? ' PTS' : 'M GP'}</span>
                         </div>
 
                         {/* Winner (if claimed) */}
@@ -5503,6 +5608,7 @@
                                                             title={event.poster.title}
                                                             goal={event.poster.goal}
                                                             reward={event.poster.reward}
+                                                            rewardType={event.poster.rewardType}
                                                             status={event.poster.status}
                                                             style={event.poster.style}
                                                             winner={event.poster.winner}
@@ -5602,6 +5708,594 @@
         }
 
         // Main App
+
+        // GUIDES COMPONENT
+
+        // RICH TEXT GUIDE EDITOR
+        function RichTextGuideEditor({ staffPassword }) {
+            const [guides, setGuides] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [editingGuide, setEditingGuide] = useState(null);
+            const [editorContent, setEditorContent] = useState('');
+            const editorRef = useRef(null);
+
+            useEffect(() => {
+                fetch(`${CONFIG.bingoApiBase}/guides`)
+                    .then(res => res.json())
+                    .then(data => { setGuides(data.guides || []); setLoading(false); })
+                    .catch(() => setLoading(false));
+            }, []);
+
+            // When editing a guide, load its HTML content
+            useEffect(() => {
+                if (editingGuide?.htmlContent) {
+                    setEditorContent(editingGuide.htmlContent);
+                }
+            }, [editingGuide]);
+            
+            // Update editor div when content changes
+            useEffect(() => {
+                if (editorRef.current && editorContent !== editorRef.current.innerHTML) {
+                    editorRef.current.innerHTML = editorContent;
+                }
+            }, [editorContent]);
+
+            const execCommand = (command, value = null) => {
+                document.execCommand(command, false, value);
+                editorRef.current?.focus();
+            };
+
+            const insertImage = async () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    console.log('📷 Starting image upload:', file.name, file.size, 'bytes');
+                    
+                    try {
+                        // Compress image before uploading
+                        console.log('🗜️ Compressing image...');
+                        const compressed = await compressImage(file, 1200, 0.8);
+                        console.log('✅ Compressed! New size:', compressed.length, 'chars');
+                        
+                        // Upload compressed image
+                        const uploadUrl = `${CONFIG.bingoApiBase}/guides/upload-image`;
+                        console.log('📤 Uploading to:', uploadUrl);
+                        
+                        const res = await fetch(uploadUrl, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({password: staffPassword, image: compressed, filename: file.name})
+                        });
+                        
+                        console.log('📥 Response status:', res.status, res.statusText);
+                        const data = await res.json();
+                        console.log('📦 Response data:', data);
+                        
+                        if (data.success) {
+                            // Insert image directly into editor
+                            if (editorRef.current) {
+                                const imgUrl = `${CONFIG.bingoApiBase}${data.url}`;
+                                console.log('🖼️ Image URL:', imgUrl);
+                                
+                                const imgHtml = `<p><img src="${imgUrl}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px; display: block;" alt="Guide image" /></p><p><br></p>`;
+                                
+                                // Insert at cursor position
+                                const selection = window.getSelection();
+                                if (selection.rangeCount > 0) {
+                                    const range = selection.getRangeAt(0);
+                                    range.deleteContents();
+                                    const fragment = range.createContextualFragment(imgHtml);
+                                    range.insertNode(fragment);
+                                    range.collapse(false);
+                                }
+                                
+                                // Update state
+                                setEditorContent(editorRef.current.innerHTML);
+                                editorRef.current.focus();
+                                console.log('✅ Image inserted successfully!');
+                            }
+                        } else {
+                            console.error('❌ Upload failed:', data.error);
+                            alert('Upload failed: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (err) {
+                        console.error('❌ Upload error:', err);
+                        alert('Upload error: ' + err.message);
+                    }
+                };
+                input.click();
+            };
+
+            const saveGuide = async () => {
+                const htmlContent = editorRef.current?.innerHTML || '';
+                const guideData = {
+                    ...editingGuide,
+                    htmlContent,
+                    // Also save as plain text for search
+                    plainText: editorRef.current?.innerText || ''
+                };
+
+                const url = editingGuide.id ? `${CONFIG.bingoApiBase}/guides/${editingGuide.id}` : `${CONFIG.bingoApiBase}/guides`;
+                const res = await fetch(url, { 
+                    method: editingGuide.id ? 'PUT' : 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: staffPassword, guide: guideData})
+                });
+                const data = await res.json();
+                if (data.success) { 
+                    alert('Saved!'); 
+                    setEditingGuide(null); 
+                    setEditorContent('');
+                    // Reload guides
+                    const guidesRes = await fetch(`${CONFIG.bingoApiBase}/guides`);
+                    const guidesData = await guidesRes.json();
+                    setGuides(guidesData.guides || []);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed'));
+                }
+            };
+
+            const deleteGuide = async (guide) => {
+                if (!confirm(`Delete "${guide.title}"?`)) return;
+                const res = await fetch(`${CONFIG.bingoApiBase}/guides/${guide.id}`, { 
+                    method: 'DELETE', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({password: staffPassword})
+                });
+                if (res.ok) { 
+                    alert('Deleted!'); 
+                    const guidesRes = await fetch(`${CONFIG.bingoApiBase}/guides`);
+                    const guidesData = await guidesRes.json();
+                    setGuides(guidesData.guides || []);
+                }
+            };
+
+            if (loading) return <div className="text-center py-10">Loading...</div>;
+
+            if (editingGuide) {
+                return (
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-merc-accent">{editingGuide.id ? 'Edit' : 'Create'} Guide</h2>
+                            <button onClick={() => { setEditingGuide(null); setEditorContent(''); }} className="px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:bg-merc-cardHover">Cancel</button>
+                        </div>
+
+                        {/* Basic Info */}
+                        <div className="bg-merc-card border border-merc-border rounded-xl p-6 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-gray-300">Title *</label>
+                                    <input type="text" placeholder="Guide Title" value={editingGuide.title || ''} onChange={(e) => setEditingGuide({...editingGuide, title: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white"/>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-gray-300">Category *</label>
+                                    <select value={editingGuide.category || ''} onChange={(e) => setEditingGuide({...editingGuide, category: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white">
+                                        <option value="">Select a category...</option>
+                                        <option value="Theatre of Blood">🩸 Theatre of Blood</option>
+                                        <option value="Chambers of Xeric">⚗️ Chambers of Xeric</option>
+                                        <option value="Tombs of Amascut">🏺 Tombs of Amascut</option>
+                                        <option value="Nex">💀 Nex</option>
+                                        <option value="DT2 Bosses">⚔️ DT2 Bosses</option>
+                                        <option value="Plugins & Setup">⚙️ Plugins & Setup</option>
+                                        <option value="Skills & Training">📚 Skills & Training</option>
+                                        <option value="Other PvM">🎯 Other PvM</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-gray-300">Difficulty</label>
+                                    <select value={editingGuide.difficulty || 'Intermediate'} onChange={(e) => setEditingGuide({...editingGuide, difficulty: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white">
+                                        <option>Beginner</option>
+                                        <option>Intermediate</option>
+                                        <option>Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-gray-300">Icon (emoji)</label>
+                                    <input type="text" placeholder="📖" value={editingGuide.icon || '📖'} onChange={(e) => setEditingGuide({...editingGuide, icon: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white text-2xl text-center"/>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2 text-gray-300">Short Description</label>
+                                    <input type="text" placeholder="Brief summary..." value={editingGuide.description || ''} onChange={(e) => setEditingGuide({...editingGuide, description: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rich Text Editor */}
+                        <div className="bg-merc-card border border-merc-border rounded-xl overflow-hidden">
+                            {/* Toolbar */}
+                            <div className="bg-merc-bg border-b border-merc-border p-3 flex flex-wrap gap-2">
+                                {/* Text Formatting */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <button onClick={() => execCommand('bold')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm font-bold" title="Bold (Ctrl+B)">B</button>
+                                    <button onClick={() => execCommand('italic')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm italic" title="Italic (Ctrl+I)">I</button>
+                                    <button onClick={() => execCommand('underline')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm underline" title="Underline (Ctrl+U)">U</button>
+                                    <button onClick={() => execCommand('strikeThrough')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm line-through" title="Strikethrough">S</button>
+                                </div>
+
+                                {/* Headings */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <button onClick={() => execCommand('formatBlock', 'h1')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm font-bold" title="Heading 1">H1</button>
+                                    <button onClick={() => execCommand('formatBlock', 'h2')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm font-bold" title="Heading 2">H2</button>
+                                    <button onClick={() => execCommand('formatBlock', 'h3')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm font-bold" title="Heading 3">H3</button>
+                                    <button onClick={() => execCommand('formatBlock', 'p')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Paragraph">P</button>
+                                </div>
+
+                                {/* Font Size */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <select onChange={(e) => execCommand('fontSize', e.target.value)} className="px-2 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" defaultValue="3">
+                                        <option value="1">Tiny</option>
+                                        <option value="2">Small</option>
+                                        <option value="3">Normal</option>
+                                        <option value="4">Large</option>
+                                        <option value="5">Huge</option>
+                                        <option value="6">Massive</option>
+                                    </select>
+                                </div>
+
+                                {/* Alignment */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <button onClick={() => execCommand('justifyLeft')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Align Left">⬅</button>
+                                    <button onClick={() => execCommand('justifyCenter')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Align Center">↔</button>
+                                    <button onClick={() => execCommand('justifyRight')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Align Right">➡</button>
+                                </div>
+
+                                {/* Lists */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <button onClick={() => execCommand('insertUnorderedList')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Bullet List">• List</button>
+                                    <button onClick={() => execCommand('insertOrderedList')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Numbered List">1. List</button>
+                                </div>
+
+                                {/* Colors */}
+                                <div className="flex gap-1 border-r border-merc-border pr-2">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs text-gray-400">Color:</span>
+                                        <input type="color" onChange={(e) => execCommand('foreColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer" title="Text Color"/>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs text-gray-400">BG:</span>
+                                        <input type="color" onChange={(e) => execCommand('backColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer" title="Background Color"/>
+                                    </div>
+                                </div>
+
+                                {/* Insert */}
+                                <div className="flex gap-1">
+                                    <button onClick={insertImage} className="px-3 py-1 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded text-sm font-semibold" title="Insert Image">🖼️ Image</button>
+                                    <button onClick={() => execCommand('insertHorizontalRule')} className="px-3 py-1 bg-merc-card hover:bg-merc-cardHover rounded text-sm" title="Horizontal Line">—</button>
+                                </div>
+
+                                {/* Clear Formatting */}
+                                <div className="flex gap-1 border-l border-merc-border pl-2">
+                                    <button onClick={() => execCommand('removeFormat')} className="px-3 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded text-sm" title="Clear Formatting">Clear Format</button>
+                                </div>
+                            </div>
+
+                            {/* Editor Area */}
+                            <div 
+                                ref={editorRef}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onInput={(e) => setEditorContent(e.currentTarget.innerHTML)}
+                                className="min-h-[500px] p-6 bg-merc-bg text-white text-lg leading-relaxed focus:outline-none"
+                                style={{ 
+                                    overflowY: 'auto',
+                                    maxHeight: '70vh'
+                                }}
+                            />
+
+                            {/* Helper Text */}
+                            <div className="bg-merc-bg border-t border-merc-border p-3 text-xs text-gray-500">
+                                <p>💡 <strong>Tips:</strong> Use the toolbar to format text. Click <strong>🖼️ Image</strong> to upload - images are auto-compressed to 1200px width. Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline.</p>
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="flex justify-end gap-4">
+                            <button onClick={() => { setEditingGuide(null); setEditorContent(''); }} className="px-6 py-2 bg-merc-card border border-merc-border rounded-lg hover:bg-merc-cardHover">Cancel</button>
+                            <button onClick={saveGuide} className="px-8 py-2 bg-merc-accent text-merc-bg font-bold rounded-lg hover:bg-merc-accentDark shadow-lg">Save Guide</button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold text-merc-accent">Manage Guides</h2>
+                        <button onClick={() => { setEditingGuide({title: '', icon: '📖', category: '', difficulty: 'Intermediate', htmlContent: ''}); setEditorContent(''); }} className="px-6 py-2 bg-merc-accent text-merc-bg font-bold rounded-lg hover:bg-merc-accentDark">+ Create Guide</button>
+                    </div>
+                    <div className="space-y-3">
+                        {guides.map(g => (
+                            <div key={g.id} className="bg-merc-card border border-merc-border rounded-xl p-4 flex justify-between items-center hover:border-merc-accent transition-all">
+                                <div className="flex items-center gap-4">
+                                    <span className="text-3xl">{g.icon}</span>
+                                    <div>
+                                        <h3 className="font-bold text-white text-lg">{g.title}</h3>
+                                        <p className="text-sm text-gray-500">{g.category} • {g.difficulty}</p>
+                                        {g.description && <p className="text-sm text-gray-400 mt-1">{g.description}</p>}
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => { setEditingGuide(g); setEditorContent(g.htmlContent || ''); }} className="px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/30">Edit</button>
+                                    <button onClick={() => deleteGuide(g)} className="px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30">Delete</button>
+                                </div>
+                            </div>
+                        ))}
+                        {guides.length === 0 && (
+                            <div className="text-center py-20 bg-merc-card border border-merc-border rounded-xl">
+                                <div className="text-6xl mb-4">📚</div>
+                                <h3 className="text-2xl font-display font-bold mb-2 text-white">No Guides Yet</h3>
+                                <p className="text-gray-400 mb-4">Create your first guide to get started!</p>
+                                <button onClick={() => { setEditingGuide({title: '', icon: '📖', category: '', difficulty: 'Intermediate', htmlContent: ''}); setEditorContent(''); }} className="px-6 py-2 bg-merc-accent text-merc-bg font-bold rounded-lg hover:bg-merc-accentDark">Create First Guide</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Updated Guides viewer to show HTML content
+        function Guides() {
+            const [guidesData, setGuidesData] = useState({ categories: {}, guides: [] });
+            const [loading, setLoading] = useState(true);
+            const [selectedGuide, setSelectedGuide] = useState(null);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [expandedCategories, setExpandedCategories] = useState({});
+
+            // Category configuration with icons and colors
+            const CATEGORY_CONFIG = {
+                "Theatre of Blood": { icon: "🩸", color: "red", gradient: "from-red-500/20 to-red-900/10", border: "border-red-500/30", text: "text-red-400", badge: "bg-red-500" },
+                "Chambers of Xeric": { icon: "⚗️", color: "lime", gradient: "from-lime-500/20 to-lime-900/10", border: "border-lime-500/30", text: "text-lime-400", badge: "bg-lime-500" },
+                "Tombs of Amascut": { icon: "🏺", color: "orange", gradient: "from-orange-500/20 to-orange-900/10", border: "border-orange-500/30", text: "text-orange-400", badge: "bg-orange-500" },
+                "Nex": { icon: "💀", color: "purple", gradient: "from-purple-500/20 to-purple-900/10", border: "border-purple-500/30", text: "text-purple-400", badge: "bg-purple-500" },
+                "Plugins & Setup": { icon: "⚙️", color: "emerald", gradient: "from-emerald-500/20 to-emerald-900/10", border: "border-emerald-500/30", text: "text-emerald-400", badge: "bg-emerald-500" },
+                "DT2 Bosses": { icon: "⚔️", color: "cyan", gradient: "from-cyan-500/20 to-cyan-900/10", border: "border-cyan-500/30", text: "text-cyan-400", badge: "bg-cyan-500" },
+                "Skills & Training": { icon: "📚", color: "indigo", gradient: "from-indigo-500/20 to-indigo-900/10", border: "border-indigo-500/30", text: "text-indigo-400", badge: "bg-indigo-500" },
+                "Other PvM": { icon: "🎯", color: "pink", gradient: "from-pink-500/20 to-pink-900/10", border: "border-pink-500/30", text: "text-pink-400", badge: "bg-pink-500" }
+            };
+
+            const CATEGORY_ORDER = [
+                "Theatre of Blood",
+                "Chambers of Xeric",
+                "Tombs of Amascut",
+                "Nex",
+                "DT2 Bosses",
+                "Plugins & Setup",
+                "Skills & Training",
+                "Other PvM"
+            ];
+
+            useEffect(() => {
+                fetch(`${CONFIG.bingoApiBase}/guides`)
+                    .then(res => res.json())
+                    .then(data => {
+                        setGuidesData(data);
+                        // Initialize all categories as expanded
+                        const expanded = {};
+                        CATEGORY_ORDER.forEach(cat => expanded[cat] = true);
+                        setExpandedCategories(expanded);
+                        setLoading(false);
+                    })
+                    .catch(() => setLoading(false));
+            }, []);
+
+            const toggleCategory = (category) => {
+                setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
+            };
+
+            const getDifficultyStyle = (difficulty) => {
+                switch(difficulty) {
+                    case 'Beginner': return 'bg-green-500/20 text-green-400 border-green-500/30';
+                    case 'Advanced': return 'bg-red-500/20 text-red-400 border-red-500/30';
+                    case 'Expert': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+                    default: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+                }
+            };
+
+            if (loading) {
+                return (
+                    <div className="text-center py-20">
+                        <div className="text-6xl mb-4 animate-pulse">📚</div>
+                        <p className="text-xl text-gray-400">Loading guides...</p>
+                    </div>
+                );
+            }
+
+            // Guide detail view
+            if (selectedGuide) {
+                const catConfig = CATEGORY_CONFIG[selectedGuide.category] || CATEGORY_CONFIG["Other PvM"];
+                return (
+                    <div className="space-y-6">
+                        <button 
+                            onClick={() => setSelectedGuide(null)} 
+                            className="group flex items-center gap-2 px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:bg-merc-cardHover hover:border-merc-accent transition-all"
+                        >
+                            <span className="group-hover:-translate-x-1 transition-transform">←</span> 
+                            Back to Guides
+                        </button>
+                        <div className="bg-merc-card border border-merc-border rounded-xl overflow-hidden">
+                            {/* Header with gradient */}
+                            <div className={`bg-gradient-to-r ${catConfig.gradient} p-8 border-b border-merc-border`}>
+                                <div className="flex items-start gap-4">
+                                    <div className="text-6xl">{selectedGuide.icon}</div>
+                                    <div className="flex-1">
+                                        <h1 className="text-4xl font-display font-bold text-merc-accent mb-2">{selectedGuide.title}</h1>
+                                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getDifficultyStyle(selectedGuide.difficulty)}`}>
+                                                {selectedGuide.difficulty}
+                                            </span>
+                                            <span className={`flex items-center gap-1.5 ${catConfig.text}`}>
+                                                <span>{catConfig.icon}</span> {selectedGuide.category}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Content */}
+                            <div className="p-8">
+                                <div 
+                                    className="prose prose-invert prose-lg max-w-none guide-content"
+                                    style={{ color: '#e5e7eb', lineHeight: '1.8' }}
+                                    dangerouslySetInnerHTML={{ __html: selectedGuide.htmlContent || '<p>No content yet.</p>' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Group and filter guides
+            const getFilteredGuidesByCategory = () => {
+                const filtered = {};
+                CATEGORY_ORDER.forEach(category => {
+                    if (selectedCategory !== 'all' && selectedCategory !== category) return;
+                    
+                    const categoryGuideIds = guidesData.categories?.[category] || [];
+                    const categoryGuides = categoryGuideIds
+                        .map(id => guidesData.guides?.find(g => g.id === id))
+                        .filter(Boolean)
+                        .filter(guide => 
+                            guide.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            guide.description?.toLowerCase().includes(searchTerm.toLowerCase())
+                        );
+                    
+                    if (categoryGuides.length > 0) {
+                        filtered[category] = categoryGuides;
+                    }
+                });
+                return filtered;
+            };
+
+            const filteredByCategory = getFilteredGuidesByCategory();
+            const totalFiltered = Object.values(filteredByCategory).flat().length;
+
+            return (
+                <div className="space-y-8">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-5xl font-display font-bold mb-4 text-merc-accent">📚 Clan Guides</h1>
+                        <p className="text-xl text-gray-400">Master OSRS content with our comprehensive guides</p>
+                        <p className="text-sm text-gray-500 mt-2">{totalFiltered} guides available</p>
+                    </div>
+
+                    {/* Search & Filter Bar */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                            <input 
+                                type="text" 
+                                placeholder="Search guides..." 
+                                value={searchTerm} 
+                                onChange={(e) => setSearchTerm(e.target.value)} 
+                                className="w-full pl-12 pr-4 py-3 bg-merc-card border border-merc-border rounded-lg text-white placeholder-gray-500 focus:border-merc-accent focus:outline-none text-lg transition-colors"
+                            />
+                            {searchTerm && (
+                                <button 
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-merc-border hover:bg-merc-accent/50 text-gray-400 hover:text-white text-sm transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                        <select 
+                            value={selectedCategory} 
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="px-4 py-3 bg-merc-card border border-merc-border rounded-lg text-white focus:border-merc-accent focus:outline-none cursor-pointer min-w-[200px]"
+                        >
+                            <option value="all">All Categories</option>
+                            {CATEGORY_ORDER.map(cat => (
+                                <option key={cat} value={cat}>{CATEGORY_CONFIG[cat]?.icon} {cat}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Category Sections */}
+                    <div className="space-y-6">
+                        {CATEGORY_ORDER.map(category => {
+                            const guides = filteredByCategory[category];
+                            if (!guides || guides.length === 0) return null;
+                            
+                            const config = CATEGORY_CONFIG[category];
+                            const isExpanded = expandedCategories[category];
+
+                            return (
+                                <div key={category} className="overflow-hidden">
+                                    {/* Category Header */}
+                                    <button
+                                        onClick={() => toggleCategory(category)}
+                                        className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${config.gradient} border ${config.border} rounded-xl hover:brightness-110 transition-all`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{config.icon}</span>
+                                            <h2 className={`text-xl font-display font-bold ${config.text}`}>{category}</h2>
+                                            <span className={`${config.badge} text-white text-sm font-bold px-2.5 py-0.5 rounded-full`}>
+                                                {guides.length}
+                                            </span>
+                                        </div>
+                                        <span className={`text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                            ▼
+                                        </span>
+                                    </button>
+
+                                    {/* Guide Cards Grid */}
+                                    {isExpanded && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pl-2">
+                                            {guides.map(guide => (
+                                                <button 
+                                                    key={guide.id} 
+                                                    onClick={() => setSelectedGuide(guide)} 
+                                                    className={`group bg-merc-card border border-merc-border rounded-xl p-5 text-left hover:bg-merc-cardHover hover:${config.border} transition-all transform hover:scale-[1.02] hover:shadow-lg`}
+                                                >
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <span className="text-3xl">{guide.icon}</span>
+                                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getDifficultyStyle(guide.difficulty)}`}>
+                                                            {guide.difficulty}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-display font-bold text-lg text-white mb-2 group-hover:text-merc-accent transition-colors">
+                                                        {guide.title}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-auto">
+                                                        <span className="text-merc-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                                        <span className="group-hover:text-gray-400 transition-colors">Read Guide</span>
+                                                    </p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* No Results */}
+                        {Object.keys(filteredByCategory).length === 0 && (
+                            <div className="text-center py-20 bg-merc-card border border-merc-border rounded-xl">
+                                <div className="text-6xl mb-4">🔍</div>
+                                <h3 className="text-2xl font-display font-bold mb-2 text-white">No Guides Found</h3>
+                                <p className="text-gray-400 mb-4">Try a different search term or category</p>
+                                <button 
+                                    onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
+                                    className="px-6 py-2 bg-merc-accent text-black font-bold rounded-lg hover:bg-merc-accentDark transition-colors"
+                                >
+                                    Clear Filters
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+
+
+
         function App() {
             const [currentPage, setCurrentPage] = useState('dashboard');
             const [darkMode, setDarkMode] = useState(true);
@@ -5626,6 +6320,7 @@
                     case 'members': return <Members />;
                     case 'bingo': return <Bingo />;
                     case 'race': return <Race />;
+                    case 'guides': return <Guides />;
                     case 'search': return <Search />;
                     case 'staff': return <Staff />;
                     default: return <Dashboard setCurrentPage={setCurrentPage} />;
