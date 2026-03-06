@@ -50,81 +50,6 @@
             min-height: 100vh;
         }
 
-        /* Guide Content Styles */
-        .guide-content {
-            font-family: 'Rajdhani', sans-serif;
-        }
-        .guide-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 16px 0;
-            border: 1px solid #2a3042;
-        }
-        .guide-content h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #e6a919;
-            margin: 24px 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #2a3042;
-        }
-        .guide-content h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #fff;
-            margin: 20px 0 10px 0;
-        }
-        .guide-content h4 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #e5e7eb;
-            margin: 16px 0 8px 0;
-        }
-        .guide-content p {
-            margin: 12px 0;
-            line-height: 1.7;
-        }
-        .guide-content a {
-            color: #4a9eff;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .guide-content a:hover {
-            color: #e6a919;
-            text-decoration: underline;
-        }
-        .guide-content strong {
-            color: #e6a919;
-            font-weight: 600;
-        }
-        .guide-content code, .guide-content pre {
-            background: #0d0f14;
-            border: 1px solid #2a3042;
-            border-radius: 6px;
-            padding: 2px 6px;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-        .guide-content pre {
-            padding: 16px;
-            overflow-x: auto;
-            margin: 16px 0;
-        }
-        .guide-content ul, .guide-content ol {
-            margin: 12px 0;
-            padding-left: 24px;
-        }
-        .guide-content li {
-            margin: 6px 0;
-        }
-        .guide-content span[style*="text-decoration:underline"] {
-            text-decoration: underline;
-            text-decoration-color: #e6a919;
-        }
-
         /* Fixed Background Image */
         .bg-inferno {
             position: fixed;
@@ -336,19 +261,15 @@
             margin: 0;
         }
 
-        /* Rank Colors - OSRS gem inspired */
-        .rank-staff { color: #ff6b35; font-weight: 600; }
-        .rank-wrath { color: #a855f7; font-weight: 600; }
-        .rank-zenyte { color: #e6a919; font-weight: 600; }
-        .rank-onyx { color: #a1a1aa; font-weight: 600; }
-        .rank-dragonstone { color: #ec4899; font-weight: 600; }
-        .rank-beast { color: #22c55e; font-weight: 600; }
-        .rank-1nana { color: #fbbf24; font-weight: 600; }
-        .rank-2nana { color: #fbbf24; font-weight: 600; }
-        .rank-3nana { color: #fbbf24; font-weight: 600; }
-        .rank-serenist { color: #22d3ee; font-weight: 600; }
-        .rank-anchor { color: #6366f1; font-weight: 600; }
-        .rank-trialist { color: #94a3b8; font-weight: 600; }
+        /* Rank Colors */
+        .rank-owner { color: #ff6b35; }
+        .rank-deputy { color: #a855f7; }
+        .rank-general { color: #4a9eff; }
+        .rank-captain { color: #4ade80; }
+        .rank-lieutenant { color: #facc15; }
+        .rank-sergeant { color: #f97316; }
+        .rank-corporal { color: #94a3b8; }
+        .rank-recruit { color: #64748b; }
 
         /* Bounty/Wanted Poster Styles */
         .bounty-card {
@@ -409,7 +330,7 @@
         }
         .activity-ticker-content {
             display: inline-flex;
-            animation: ticker 60s linear infinite;
+            animation: ticker 30s linear infinite;
         }
         .activity-ticker-content:hover {
             animation-play-state: paused;
@@ -1105,18 +1026,14 @@
 
         const getRankColor = (rank) => {
             const colors = {
-                'staff': 'rank-staff',
-                'wrath': 'rank-wrath',
-                'zenyte': 'rank-zenyte',
-                'onyx': 'rank-onyx',
-                'dragonstone': 'rank-dragonstone',
-                'beast': 'rank-beast',
-                '1 nana': 'rank-1nana',
-                '2 nana': 'rank-2nana',
-                '3 nana': 'rank-3nana',
-                'serenist': 'rank-serenist',
-                'anchor': 'rank-anchor',
-                'trialist': 'rank-trialist',
+                'owner': 'rank-owner',
+                'deputy owner': 'rank-deputy',
+                'general': 'rank-general',
+                'captain': 'rank-captain',
+                'lieutenant': 'rank-lieutenant',
+                'sergeant': 'rank-sergeant',
+                'corporal': 'rank-corporal',
+                'recruit': 'rank-recruit',
             };
             return colors[rank?.toLowerCase()] || 'text-gray-400';
         };
@@ -1611,7 +1528,6 @@
                                         title={poster.title}
                                         goal={poster.goal}
                                         reward={poster.reward}
-                                        rewardType={poster.rewardType}
                                         status={poster.status}
                                         style={poster.style}
                                         winner={poster.winner}
@@ -1649,25 +1565,11 @@
             const { data: frontPageData, loading: fpLoading } = useSheetData('Front Page!A2:H1000');
             const { data: splitsData, loading: splitsLoading } = useSheetData('Clan splits!A2:B1000');
             const { data: diaryData, loading: diaryLoading } = useSheetData('Diary Points!A2:C1000');
-            const [bountiesData, setBountiesData] = useState([]);
-            const [bountiesLoading, setBountiesLoading] = useState(true);
-
-            // Fetch bounties leaderboard from API
-            useEffect(() => {
-                fetch(`${CONFIG.bingoApiBase}/leaderboard?type=bounties`)
-                    .then(res => res.json())
-                    .then(data => {
-                        setBountiesData(data || []);
-                        setBountiesLoading(false);
-                    })
-                    .catch(() => setBountiesLoading(false));
-            }, []);
 
             const tabs = [
                 { id: 'splits', label: '💰 Splits', color: 'merc-green' },
                 { id: 'drops', label: '🎯 Drops', color: 'merc-accent' },
                 { id: 'diary', label: '📘 Diary Points', color: 'merc-blue' },
-                { id: 'bounties', label: '🎪 Bounties', color: 'merc-orange' },
             ];
 
             const splitsLeaderboard = splitsData
@@ -1695,14 +1597,13 @@
                 .filter(e => e.name && !IGNORED_NAMES.includes(e.name))
                 .sort((a, b) => b.value - a.value);
 
-            const loading = fpLoading || splitsLoading || diaryLoading || (activeTab === 'bounties' && bountiesLoading);
+            const loading = fpLoading || splitsLoading || diaryLoading;
 
             const getLeaderboard = () => {
                 switch (activeTab) {
                     case 'splits': return splitsLeaderboard;
                     case 'drops': return dropsLeaderboard.map(d => ({ name: d.name, value: d.drops }));
                     case 'diary': return diaryLeaderboard;
-                    case 'bounties': return bountiesData.map(p => ({ name: p.name, value: p.bountiesClaimed }));
                     default: return [];
                 }
             };
@@ -1712,7 +1613,6 @@
                     case 'splits': return 'M GP';
                     case 'drops': return ' drops';
                     case 'diary': return ' pts';
-                    case 'bounties': return ' claimed';
                     default: return '';
                 }
             };
@@ -1804,89 +1704,44 @@
             const { data: frontPageData, loading } = useSheetData('Front Page!A2:H1000');
             const [search, setSearch] = useState('');
             const [selectedMember, setSelectedMember] = useState(null);
-            const [filterRank, setFilterRank] = useState('all');
 
-            // Rank section headers in the spreadsheet
-            const RANK_HEADERS = ['staff', 'wrath', 'zenyte', 'onyx', 'dragonstone', 'beast', '1 nana', '2 nana', '3 nana', 'serenist', 'anchor', 'trialist'];
-
-            // Parse members with rank detection from section headers
-            const members = (() => {
-                const result = [];
-                let currentRank = 'Member';
-
-                for (const row of frontPageData) {
-                    const firstCell = row[0]?.trim();
-                    if (!firstCell) continue;
-
-                    // Check if this row is a rank header
-                    const isRankHeader = RANK_HEADERS.includes(firstCell.toLowerCase());
-                    
-                    if (isRankHeader) {
-                        currentRank = firstCell;
-                        continue;
-                    }
-
-                    // Skip rows that look like headers or empty data
-                    if (firstCell.toLowerCase() === 'name' || firstCell.toLowerCase() === 'reserved') continue;
-
-                    const parsed = parsePlayerName(firstCell);
-                    
-                    // Skip ignored names
-                    if (IGNORED_NAMES.includes(parsed.main)) continue;
-
-                    result.push({
-                        name: firstCell,
+            const members = frontPageData
+                .map(row => {
+                    const parsed = parsePlayerName(row[0]?.trim());
+                    return {
+                        name: row[0]?.trim(),
                         mainName: parsed.main,
                         altName: parsed.alt,
                         hasAlt: parsed.hasAlt,
                         region: row[1] || 'Unknown',
                         joinDate: row[2] || 'N/A',
                         daysInClan: row[3] || '0',
-                        rank: currentRank,
+                        rank: row[4] || 'Member',
                         splits: row[5] || '0',
                         drops: row[6] || '0',
                         diaryPoints: row[7] || '0',
-                    });
-                }
+                    };
+                })
+                .filter(m => m.mainName && !IGNORED_NAMES.includes(m.mainName));
 
-                return result;
-            })();
-
-            // Get unique ranks for filter
-            const uniqueRanks = [...new Set(members.map(m => m.rank))];
-
-            const filteredMembers = members.filter(m => {
-                const matchesSearch = m.mainName.toLowerCase().includes(search.toLowerCase()) ||
-                    (m.altName && m.altName.toLowerCase().includes(search.toLowerCase()));
-                const matchesRank = filterRank === 'all' || m.rank.toLowerCase() === filterRank.toLowerCase();
-                return matchesSearch && matchesRank;
-            });
+            const filteredMembers = members.filter(m => 
+                m.mainName.toLowerCase().includes(search.toLowerCase()) ||
+                (m.altName && m.altName.toLowerCase().includes(search.toLowerCase()))
+            );
 
             return (
                 <div className="space-y-6 fade-in">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <h1 className="font-display text-3xl font-bold">👥 Clan Members</h1>
-                        <div className="flex gap-3">
-                            <select
-                                value={filterRank}
-                                onChange={(e) => setFilterRank(e.target.value)}
-                                className="bg-merc-card border border-merc-border rounded-lg px-3 py-2 font-body text-white focus:outline-none focus:border-merc-accent"
-                            >
-                                <option value="all">All Ranks</option>
-                                {uniqueRanks.map(rank => (
-                                    <option key={rank} value={rank}>{rank}</option>
-                                ))}
-                            </select>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search members..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full sm:w-64 bg-merc-card border border-merc-border rounded-lg px-4 py-2 pl-10 font-body text-white placeholder-gray-500 focus:outline-none focus:border-merc-accent"
-                                />
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
-                            </div>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search members..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full sm:w-64 bg-merc-card border border-merc-border rounded-lg px-4 py-2 pl-10 font-body text-white placeholder-gray-500 focus:outline-none focus:border-merc-accent"
+                            />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
                         </div>
                     </div>
 
@@ -2448,10 +2303,24 @@
                                                 style={getTilePosition(tile)}
                                                 title={`${tile.label}: ${tile.task || 'No task'}`}
                                             >
-                                                {/* Tile marker */}
-                                                <div className="w-6 h-6 bg-merc-accent/30 border-2 border-merc-accent rounded-full flex items-center justify-center text-xs font-bold">
-                                                    {tile.label}
-                                                </div>
+                                                {/* Tile marker - only show if not hidden */}
+                                                {!race.hideTileLabels && (
+                                                    <div 
+                                                        className="w-6 h-6 border-2 rounded-full flex items-center justify-center text-xs font-bold"
+                                                        style={{
+                                                            backgroundColor: race.tileLabelBgColor || 'rgba(230, 169, 25, 0.3)',
+                                                            borderColor: race.tileLabelColor || '#e6a919',
+                                                            color: race.tileLabelColor || '#e6a919'
+                                                        }}
+                                                    >
+                                                        {tile.label}
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Invisible hitbox when labels are hidden */}
+                                                {race.hideTileLabels && (
+                                                    <div className="w-8 h-8 rounded-full" />
+                                                )}
                                                 
                                                 {/* Team pawns */}
                                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 flex gap-1 mt-1">
@@ -2635,7 +2504,10 @@
                 boardImage: race?.boardImage || '',
                 tiles: race?.tiles || [],
                 teams: race?.teams || [],
-                discordChannelId: race?.discordChannelId || ''
+                discordChannelId: race?.discordChannelId || '',
+                hideTileLabels: race?.hideTileLabels || false,
+                tileLabelColor: race?.tileLabelColor || '#e6a919',
+                tileLabelBgColor: race?.tileLabelBgColor || 'rgba(230, 169, 25, 0.3)'
             });
             const [saving, setSaving] = useState(false);
             const [error, setError] = useState('');
@@ -2881,6 +2753,61 @@
                                         {formData.boardImage && (
                                             <img src={formData.boardImage} alt="Board Preview" className="mt-2 max-h-48 rounded-lg" />
                                         )}
+                                    </div>
+                                    
+                                    {/* Tile Label Settings */}
+                                    <div className="border-t border-merc-border pt-4 mt-4">
+                                        <h4 className="font-bold text-white mb-3">Tile Label Settings</h4>
+                                        <div className="space-y-3">
+                                            <label className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.hideTileLabels}
+                                                    onChange={e => setFormData(prev => ({ ...prev, hideTileLabels: e.target.checked }))}
+                                                    className="w-5 h-5 rounded accent-merc-accent"
+                                                />
+                                                <span className="text-gray-300">Hide tile labels (use if labels are already on board image)</span>
+                                            </label>
+                                            
+                                            {!formData.hideTileLabels && (
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm text-gray-400 mb-1">Label Text Color</label>
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="color"
+                                                                value={formData.tileLabelColor}
+                                                                onChange={e => setFormData(prev => ({ ...prev, tileLabelColor: e.target.value }))}
+                                                                className="w-10 h-10 rounded cursor-pointer"
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                value={formData.tileLabelColor}
+                                                                onChange={e => setFormData(prev => ({ ...prev, tileLabelColor: e.target.value }))}
+                                                                className="flex-1 px-3 py-2 bg-merc-bg border border-merc-border rounded-lg text-white text-sm"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-400 mb-1">Label Background</label>
+                                                        <select
+                                                            value={formData.tileLabelBgColor}
+                                                            onChange={e => setFormData(prev => ({ ...prev, tileLabelBgColor: e.target.value }))}
+                                                            className="w-full px-3 py-2 bg-merc-bg border border-merc-border rounded-lg text-white text-sm"
+                                                        >
+                                                            <option value="rgba(230, 169, 25, 0.3)">Gold (default)</option>
+                                                            <option value="rgba(255, 255, 255, 0.3)">White</option>
+                                                            <option value="rgba(0, 0, 0, 0.5)">Dark</option>
+                                                            <option value="rgba(0, 0, 0, 0.8)">Darker</option>
+                                                            <option value="transparent">Transparent</option>
+                                                            <option value="rgba(255, 0, 0, 0.3)">Red</option>
+                                                            <option value="rgba(0, 255, 0, 0.3)">Green</option>
+                                                            <option value="rgba(0, 100, 255, 0.3)">Blue</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -3422,7 +3349,6 @@
                                     title={poster.title}
                                     goal={poster.goal}
                                     reward={poster.reward}
-                                    rewardType={poster.rewardType}
                                     status={poster.status}
                                     style={poster.style}
                                     winner={poster.winner}
@@ -3660,7 +3586,6 @@
             const [posterTitle, setPosterTitle] = useState('');
             const [posterGoal, setPosterGoal] = useState('');
             const [posterReward, setPosterReward] = useState('');
-            const [posterRewardType, setPosterRewardType] = useState('gp');
             const [posterStatus, setPosterStatus] = useState('open');
             const [posterHost, setPosterHost] = useState('');
             const [posterWinner, setPosterWinner] = useState('');
@@ -3708,7 +3633,6 @@
                     setPosterTitle(editingPoster.title);
                     setPosterGoal(editingPoster.goal);
                     setPosterReward(editingPoster.reward);
-                    setPosterRewardType(editingPoster.rewardType || 'gp');
                     setPosterStatus(editingPoster.status);
                     setPosterStyle(editingPoster.style);
                     setPosterHost(editingPoster.host || '');
@@ -3810,7 +3734,6 @@
                 setPosterTitle('');
                 setPosterGoal('');
                 setPosterReward('');
-                setPosterRewardType('gp');
                 setPosterStatus('open');
                 setPosterStyle('classic');
                 setPosterHost('');
@@ -3849,7 +3772,6 @@
                     title: posterTitle,
                     goal: posterGoal,
                     reward: posterReward,
-                    rewardType: posterRewardType,
                     status: posterStatus,
                     style: posterStyle,
                     host: posterHost,
@@ -4044,16 +3966,6 @@
                         >
                             📚 Guides
                         </button>
-                        <button
-                            onClick={() => setActiveSection('activity')}
-                            className={`px-4 py-2 rounded-lg font-body font-semibold ${
-                                activeSection === 'activity' 
-                                    ? 'bg-merc-accent/20 text-merc-accent' 
-                                    : 'bg-merc-card text-gray-400'
-                            }`}
-                        >
-                            📢 Activity Log
-                        </button>
                         <a
                             href="admin.html"
                             className="px-4 py-2 rounded-lg font-body font-semibold bg-merc-card text-gray-400 hover:bg-merc-orange/20 hover:text-merc-orange transition-colors"
@@ -4219,24 +4131,14 @@
                                     
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="text-gray-400 text-sm mb-1 block">Reward *</label>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="number"
-                                                    value={posterReward}
-                                                    onChange={(e) => setPosterReward(e.target.value)}
-                                                    className="flex-1 bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
-                                                    placeholder="50"
-                                                />
-                                                <select
-                                                    value={posterRewardType}
-                                                    onChange={(e) => setPosterRewardType(e.target.value)}
-                                                    className="bg-merc-bg border border-merc-border rounded-lg px-3 py-2 text-white"
-                                                >
-                                                    <option value="gp">M GP</option>
-                                                    <option value="points">Points</option>
-                                                </select>
-                                            </div>
+                                            <label className="text-gray-400 text-sm mb-1 block">Reward (M) *</label>
+                                            <input
+                                                type="number"
+                                                value={posterReward}
+                                                onChange={(e) => setPosterReward(e.target.value)}
+                                                className="w-full bg-merc-bg border border-merc-border rounded-lg px-4 py-2 text-white"
+                                                placeholder="50"
+                                            />
                                         </div>
                                         
                                         <div>
@@ -4373,7 +4275,6 @@
                                     title={posterTitle || 'Bounty Title'}
                                     goal={posterGoal || 'Complete the objective to claim the reward'}
                                     reward={posterReward || '0'}
-                                    rewardType={posterRewardType}
                                     status={posterStatus}
                                     style={posterStyle}
                                     host={posterHost}
@@ -4810,161 +4711,12 @@
                             <RichTextGuideEditor staffPassword={staffPassword} />
                         </div>
                     )}
-
-                    {activeSection === 'activity' && (
-                        <div className="bg-merc-card border border-merc-border rounded-xl p-6">
-                            <h2 className="font-display font-bold text-xl mb-4">📢 Activity Log</h2>
-                            <p className="text-gray-400 mb-4">View and manage activity entries. Delete unwanted entries from the activity feed.</p>
-                            
-                            <ActivityManager staffPassword={staffPassword} />
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-
-        // ============ ACTIVITY MANAGER (Staff) ============
-        function ActivityManager({ staffPassword }) {
-            const [activities, setActivities] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [filterType, setFilterType] = useState('all');
-            const [deleting, setDeleting] = useState(null);
-
-            const loadActivities = async () => {
-                try {
-                    const res = await fetch(`${CONFIG.bingoApiBase}/activity?limit=100`);
-                    const data = await res.json();
-                    setActivities(data || []);
-                } catch (err) {
-                    console.error('Failed to load activities:', err);
-                }
-                setLoading(false);
-            };
-
-            useEffect(() => {
-                loadActivities();
-            }, []);
-
-            const deleteActivity = async (id) => {
-                if (!confirm('Are you sure you want to delete this activity entry?')) return;
-                
-                setDeleting(id);
-                try {
-                    const res = await fetch(`${CONFIG.bingoApiBase}/activity/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password: staffPassword })
-                    });
-                    
-                    if (res.ok) {
-                        setActivities(prev => prev.filter(a => a.id !== id));
-                    } else {
-                        alert('Failed to delete activity');
-                    }
-                } catch (err) {
-                    alert('Error deleting activity');
-                }
-                setDeleting(null);
-            };
-
-            const getActivityIcon = (type) => {
-                switch (type) {
-                    case 'bingo_tile': return '🎯';
-                    case 'bingo_win': return '🏆';
-                    case 'bounty_claimed': return '💰';
-                    case 'achievement': return '🎖️';
-                    case 'hall_of_fame': return '⭐';
-                    case 'guides': return '📚';
-                    case 'race': return '🏁';
-                    default: return '📢';
-                }
-            };
-
-            const getTypeColor = (type) => {
-                switch (type) {
-                    case 'bingo_win': return 'text-green-400';
-                    case 'bounty_claimed': return 'text-merc-accent';
-                    case 'achievement': return 'text-purple-400';
-                    case 'guides': return 'text-blue-400';
-                    case 'race': return 'text-orange-400';
-                    default: return 'text-gray-300';
-                }
-            };
-
-            const activityTypes = ['all', 'bingo_tile', 'bingo_win', 'bounty_claimed', 'achievement', 'hall_of_fame', 'guides', 'race'];
-            
-            const filteredActivities = filterType === 'all' 
-                ? activities 
-                : activities.filter(a => a.type === filterType);
-
-            if (loading) {
-                return <div className="text-center py-8"><div className="spinner"></div></div>;
-            }
-
-            return (
-                <div className="space-y-4">
-                    {/* Filter */}
-                    <div className="flex items-center gap-4 flex-wrap">
-                        <label className="text-gray-400">Filter by type:</label>
-                        <select 
-                            value={filterType} 
-                            onChange={(e) => setFilterType(e.target.value)}
-                            className="bg-merc-bg border border-merc-border rounded-lg px-3 py-2 text-white"
-                        >
-                            {activityTypes.map(type => (
-                                <option key={type} value={type}>
-                                    {type === 'all' ? '📋 All Types' : `${getActivityIcon(type)} ${type.replace('_', ' ')}`}
-                                </option>
-                            ))}
-                        </select>
-                        <span className="text-gray-500">({filteredActivities.length} entries)</span>
-                        <button 
-                            onClick={loadActivities}
-                            className="ml-auto px-3 py-2 bg-merc-bg border border-merc-border rounded-lg hover:border-merc-accent transition-colors"
-                        >
-                            🔄 Refresh
-                        </button>
-                    </div>
-
-                    {/* Activity List */}
-                    <div className="max-h-[600px] overflow-y-auto space-y-2">
-                        {filteredActivities.map((activity) => (
-                            <div 
-                                key={activity.id} 
-                                className="flex items-center gap-3 p-3 bg-merc-bg rounded-lg border border-merc-border hover:border-merc-border/80"
-                            >
-                                <span className="text-xl">{getActivityIcon(activity.type)}</span>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className={`font-bold ${getTypeColor(activity.type)}`}>{activity.player}</span>
-                                        <span className="text-xs text-gray-500 bg-merc-card px-2 py-0.5 rounded">{activity.type}</span>
-                                    </div>
-                                    <p className="text-gray-400 text-sm truncate">{activity.details}</p>
-                                    <p className="text-gray-600 text-xs">{new Date(activity.timestamp).toLocaleString()}</p>
-                                </div>
-                                <button
-                                    onClick={() => deleteActivity(activity.id)}
-                                    disabled={deleting === activity.id}
-                                    className="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
-                                >
-                                    {deleting === activity.id ? '...' : '🗑️'}
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-
-                    {filteredActivities.length === 0 && (
-                        <div className="text-center py-8 text-gray-500">
-                            No activities found for this filter.
-                        </div>
-                    )}
                 </div>
             );
         }
 
         // Wanted Poster Component (reusable)
-        function WantedPoster({ id, title, goal, reward, rewardType = 'gp', status, style = 'classic', winner, host, date, image }) {
+        function WantedPoster({ id, title, goal, reward, status, style = 'classic', winner, host, date, image }) {
             const isOpen = status === 'open';
             
             const styleClasses = {
@@ -5110,7 +4862,7 @@
                             color: style === 'classic' ? '#8b0000' : style === 'dark' ? '#ff6b35' : '#ff0000',
                             textShadow: style === 'bloody' ? '0 0 10px rgba(255,0,0,0.5)' : 'none'
                         }}>
-                            {reward}<span style={{ fontSize: '1.2rem', color: rewardType === 'points' ? '#a855f7' : '#d4af37' }}>{rewardType === 'points' ? ' PTS' : 'M GP'}</span>
+                            {reward}<span style={{ fontSize: '1.2rem', color: '#d4af37' }}>M GP</span>
                         </div>
 
                         {/* Winner (if claimed) */}
@@ -5154,17 +4906,7 @@
         function ActivityTicker() {
             const { activity } = useActivity(20);
 
-            // Filter out unwanted activity types
-            const HIDDEN_ACTIVITY_TYPES = ['guides']; // Add types to hide here
-            const filteredActivity = activity.filter(item => {
-                // Hide certain activity types entirely
-                if (HIDDEN_ACTIVITY_TYPES.includes(item.type)) return false;
-                // Hide expired bounties (player name is "Expired")
-                if (item.type === 'bounty_claimed' && item.player?.toLowerCase() === 'expired') return false;
-                return true;
-            });
-
-            if (filteredActivity.length === 0) return null;
+            if (activity.length === 0) return null;
 
             const getActivityIcon = (type) => {
                 switch (type) {
@@ -5187,7 +4929,7 @@
             };
 
             // Duplicate for seamless loop
-            const doubledActivity = [...filteredActivity, ...filteredActivity];
+            const doubledActivity = [...activity, ...activity];
 
             return (
                 <div className="activity-ticker py-2">
@@ -5846,7 +5588,6 @@
                                                             title={event.poster.title}
                                                             goal={event.poster.goal}
                                                             reward={event.poster.reward}
-                                                            rewardType={event.poster.rewardType}
                                                             status={event.poster.status}
                                                             style={event.poster.style}
                                                             winner={event.poster.winner}
@@ -6111,17 +5852,7 @@
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold mb-2 text-gray-300">Category *</label>
-                                    <select value={editingGuide.category || ''} onChange={(e) => setEditingGuide({...editingGuide, category: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white">
-                                        <option value="">Select a category...</option>
-                                        <option value="Theatre of Blood">🩸 Theatre of Blood</option>
-                                        <option value="Chambers of Xeric">⚗️ Chambers of Xeric</option>
-                                        <option value="Tombs of Amascut">🏺 Tombs of Amascut</option>
-                                        <option value="Nex">💀 Nex</option>
-                                        <option value="DT2 Bosses">⚔️ DT2 Bosses</option>
-                                        <option value="Plugins & Setup">⚙️ Plugins & Setup</option>
-                                        <option value="Skills & Training">📚 Skills & Training</option>
-                                        <option value="Other PvM">🎯 Other PvM</option>
-                                    </select>
+                                    <input type="text" placeholder="e.g., Theatre of Blood" value={editingGuide.category || ''} onChange={(e) => setEditingGuide({...editingGuide, category: e.target.value})} className="w-full px-4 py-2 bg-merc-bg border border-merc-border rounded-lg text-white"/>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold mb-2 text-gray-300">Difficulty</label>
@@ -6279,253 +6010,79 @@
 
         // Updated Guides viewer to show HTML content
         function Guides() {
-            const [guidesData, setGuidesData] = useState({ categories: {}, guides: [] });
+            const [guides, setGuides] = useState([]);
             const [loading, setLoading] = useState(true);
             const [selectedGuide, setSelectedGuide] = useState(null);
             const [searchTerm, setSearchTerm] = useState('');
-            const [selectedCategory, setSelectedCategory] = useState('all');
-            const [expandedCategories, setExpandedCategories] = useState({});
-
-            // Category configuration with icons and colors
-            const CATEGORY_CONFIG = {
-                "Theatre of Blood": { icon: "🩸", color: "red", gradient: "from-red-500/20 to-red-900/10", border: "border-red-500/30", text: "text-red-400", badge: "bg-red-500" },
-                "Chambers of Xeric": { icon: "⚗️", color: "lime", gradient: "from-lime-500/20 to-lime-900/10", border: "border-lime-500/30", text: "text-lime-400", badge: "bg-lime-500" },
-                "Tombs of Amascut": { icon: "🏺", color: "orange", gradient: "from-orange-500/20 to-orange-900/10", border: "border-orange-500/30", text: "text-orange-400", badge: "bg-orange-500" },
-                "Nex": { icon: "💀", color: "purple", gradient: "from-purple-500/20 to-purple-900/10", border: "border-purple-500/30", text: "text-purple-400", badge: "bg-purple-500" },
-                "Plugins & Setup": { icon: "⚙️", color: "emerald", gradient: "from-emerald-500/20 to-emerald-900/10", border: "border-emerald-500/30", text: "text-emerald-400", badge: "bg-emerald-500" },
-                "DT2 Bosses": { icon: "⚔️", color: "cyan", gradient: "from-cyan-500/20 to-cyan-900/10", border: "border-cyan-500/30", text: "text-cyan-400", badge: "bg-cyan-500" },
-                "Skills & Training": { icon: "📚", color: "indigo", gradient: "from-indigo-500/20 to-indigo-900/10", border: "border-indigo-500/30", text: "text-indigo-400", badge: "bg-indigo-500" },
-                "Other PvM": { icon: "🎯", color: "pink", gradient: "from-pink-500/20 to-pink-900/10", border: "border-pink-500/30", text: "text-pink-400", badge: "bg-pink-500" }
-            };
-
-            const CATEGORY_ORDER = [
-                "Theatre of Blood",
-                "Chambers of Xeric",
-                "Tombs of Amascut",
-                "Nex",
-                "DT2 Bosses",
-                "Plugins & Setup",
-                "Skills & Training",
-                "Other PvM"
-            ];
 
             useEffect(() => {
                 fetch(`${CONFIG.bingoApiBase}/guides`)
                     .then(res => res.json())
                     .then(data => {
-                        setGuidesData(data);
-                        // Initialize all categories as expanded
-                        const expanded = {};
-                        CATEGORY_ORDER.forEach(cat => expanded[cat] = true);
-                        setExpandedCategories(expanded);
+                        setGuides(data.guides || []);
                         setLoading(false);
                     })
                     .catch(() => setLoading(false));
             }, []);
 
-            const toggleCategory = (category) => {
-                setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
-            };
+            if (loading) return <div className="text-center py-20"><div className="text-6xl mb-4">📚</div><p className="text-xl text-gray-400">Loading guides...</p></div>;
 
-            const getDifficultyStyle = (difficulty) => {
-                switch(difficulty) {
-                    case 'Beginner': return 'bg-green-500/20 text-green-400 border-green-500/30';
-                    case 'Advanced': return 'bg-red-500/20 text-red-400 border-red-500/30';
-                    case 'Expert': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-                    default: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-                }
-            };
-
-            if (loading) {
-                return (
-                    <div className="text-center py-20">
-                        <div className="text-6xl mb-4 animate-pulse">📚</div>
-                        <p className="text-xl text-gray-400">Loading guides...</p>
-                    </div>
-                );
-            }
-
-            // Guide detail view
             if (selectedGuide) {
-                const catConfig = CATEGORY_CONFIG[selectedGuide.category] || CATEGORY_CONFIG["Other PvM"];
                 return (
                     <div className="space-y-6">
-                        <button 
-                            onClick={() => setSelectedGuide(null)} 
-                            className="group flex items-center gap-2 px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:bg-merc-cardHover hover:border-merc-accent transition-all"
-                        >
-                            <span className="group-hover:-translate-x-1 transition-transform">←</span> 
-                            Back to Guides
-                        </button>
-                        <div className="bg-merc-card border border-merc-border rounded-xl overflow-hidden">
-                            {/* Header with gradient */}
-                            <div className={`bg-gradient-to-r ${catConfig.gradient} p-8 border-b border-merc-border`}>
-                                <div className="flex items-start gap-4">
-                                    <div className="text-6xl">{selectedGuide.icon}</div>
-                                    <div className="flex-1">
-                                        <h1 className="text-4xl font-display font-bold text-merc-accent mb-2">{selectedGuide.title}</h1>
-                                        <div className="flex flex-wrap items-center gap-3 mt-3">
-                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getDifficultyStyle(selectedGuide.difficulty)}`}>
-                                                {selectedGuide.difficulty}
-                                            </span>
-                                            <span className={`flex items-center gap-1.5 ${catConfig.text}`}>
-                                                <span>{catConfig.icon}</span> {selectedGuide.category}
-                                            </span>
-                                        </div>
+                        <button onClick={() => setSelectedGuide(null)} className="px-4 py-2 bg-merc-card border border-merc-border rounded-lg hover:bg-merc-cardHover hover:border-merc-accent transition-all">← Back to Guides</button>
+                        <div className="bg-merc-card border border-merc-border rounded-xl p-8">
+                            <div className="flex items-start gap-4 mb-6">
+                                <div className="text-6xl">{selectedGuide.icon}</div>
+                                <div className="flex-1">
+                                    <h1 className="text-4xl font-display font-bold text-merc-accent mb-2">{selectedGuide.title}</h1>
+                                    {selectedGuide.description && <p className="text-lg text-gray-400 mb-3">{selectedGuide.description}</p>}
+                                    <div className="flex items-center gap-3">
+                                        <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${selectedGuide.difficulty === 'Beginner' ? 'bg-green-500/20 text-green-400 border-green-500/30' : selectedGuide.difficulty === 'Advanced' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'}`}>
+                                            {selectedGuide.difficulty}
+                                        </span>
+                                        <span className="text-gray-500">📂 {selectedGuide.category}</span>
                                     </div>
                                 </div>
                             </div>
-                            {/* Content */}
-                            <div className="p-8">
-                                <div 
-                                    className="prose prose-invert prose-lg max-w-none guide-content"
-                                    style={{ color: '#e5e7eb', lineHeight: '1.8' }}
-                                    dangerouslySetInnerHTML={{ __html: selectedGuide.htmlContent || '<p>No content yet.</p>' }}
-                                />
-                            </div>
+                            <hr className="border-merc-border mb-6"/>
+                            <div 
+                                className="prose prose-invert prose-lg max-w-none"
+                                style={{
+                                    color: '#e5e7eb',
+                                    lineHeight: '1.8'
+                                }}
+                                dangerouslySetInnerHTML={{ __html: selectedGuide.htmlContent || '<p>No content yet.</p>' }}
+                            />
                         </div>
                     </div>
                 );
             }
 
-            // Group and filter guides
-            const getFilteredGuidesByCategory = () => {
-                const filtered = {};
-                CATEGORY_ORDER.forEach(category => {
-                    if (selectedCategory !== 'all' && selectedCategory !== category) return;
-                    
-                    // Filter guides by their actual category field (not the static categories mapping)
-                    const categoryGuides = (guidesData.guides || [])
-                        .filter(guide => guide.category === category)
-                        .filter(guide => 
-                            guide.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            guide.description?.toLowerCase().includes(searchTerm.toLowerCase())
-                        );
-                    
-                    if (categoryGuides.length > 0) {
-                        filtered[category] = categoryGuides;
-                    }
-                });
-                return filtered;
-            };
-
-            const filteredByCategory = getFilteredGuidesByCategory();
-            const totalFiltered = Object.values(filteredByCategory).flat().length;
+            const filteredGuides = guides.filter(g => 
+                g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                g.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                g.description?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
 
             return (
                 <div className="space-y-8">
-                    {/* Header */}
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-12">
                         <h1 className="text-5xl font-display font-bold mb-4 text-merc-accent">📚 Clan Guides</h1>
                         <p className="text-xl text-gray-400">Master OSRS content with our comprehensive guides</p>
-                        <p className="text-sm text-gray-500 mt-2">{totalFiltered} guides available</p>
                     </div>
-
-                    {/* Search & Filter Bar */}
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
-                            <input 
-                                type="text" 
-                                placeholder="Search guides..." 
-                                value={searchTerm} 
-                                onChange={(e) => setSearchTerm(e.target.value)} 
-                                className="w-full pl-12 pr-4 py-3 bg-merc-card border border-merc-border rounded-lg text-white placeholder-gray-500 focus:border-merc-accent focus:outline-none text-lg transition-colors"
-                            />
-                            {searchTerm && (
-                                <button 
-                                    onClick={() => setSearchTerm('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-merc-border hover:bg-merc-accent/50 text-gray-400 hover:text-white text-sm transition-colors"
-                                >
-                                    ✕
-                                </button>
-                            )}
-                        </div>
-                        <select 
-                            value={selectedCategory} 
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="px-4 py-3 bg-merc-card border border-merc-border rounded-lg text-white focus:border-merc-accent focus:outline-none cursor-pointer min-w-[200px]"
-                        >
-                            <option value="all">All Categories</option>
-                            {CATEGORY_ORDER.map(cat => (
-                                <option key={cat} value={cat}>{CATEGORY_CONFIG[cat]?.icon} {cat}</option>
-                            ))}
-                        </select>
+                    <input type="text" placeholder="🔍 Search guides..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full px-4 py-3 bg-merc-card border border-merc-border rounded-lg text-white placeholder-gray-500 focus:border-merc-accent focus:outline-none text-lg"/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredGuides.map((guide) => (
+                            <button key={guide.id} onClick={() => setSelectedGuide(guide)} className="bg-merc-card border border-merc-border rounded-xl p-6 text-left hover:bg-merc-cardHover hover:border-merc-accent transition-all transform hover:scale-105">
+                                <div className="text-4xl mb-3">{guide.icon}</div>
+                                <h3 className="font-display font-bold text-xl text-white mb-2">{guide.title}</h3>
+                                {guide.description && <p className="text-sm text-gray-400 mb-2">{guide.description}</p>}
+                                <p className="text-sm text-gray-500">{guide.category} • {guide.difficulty}</p>
+                            </button>
+                        ))}
                     </div>
-
-                    {/* Category Sections */}
-                    <div className="space-y-6">
-                        {CATEGORY_ORDER.map(category => {
-                            const guides = filteredByCategory[category];
-                            if (!guides || guides.length === 0) return null;
-                            
-                            const config = CATEGORY_CONFIG[category];
-                            const isExpanded = expandedCategories[category];
-
-                            return (
-                                <div key={category} className="overflow-hidden">
-                                    {/* Category Header */}
-                                    <button
-                                        onClick={() => toggleCategory(category)}
-                                        className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${config.gradient} border ${config.border} rounded-xl hover:brightness-110 transition-all`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{config.icon}</span>
-                                            <h2 className={`text-xl font-display font-bold ${config.text}`}>{category}</h2>
-                                            <span className={`${config.badge} text-white text-sm font-bold px-2.5 py-0.5 rounded-full`}>
-                                                {guides.length}
-                                            </span>
-                                        </div>
-                                        <span className={`text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                                            ▼
-                                        </span>
-                                    </button>
-
-                                    {/* Guide Cards Grid */}
-                                    {isExpanded && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pl-2">
-                                            {guides.map(guide => (
-                                                <button 
-                                                    key={guide.id} 
-                                                    onClick={() => setSelectedGuide(guide)} 
-                                                    className={`group bg-merc-card border border-merc-border rounded-xl p-5 text-left hover:bg-merc-cardHover hover:${config.border} transition-all transform hover:scale-[1.02] hover:shadow-lg`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-3">
-                                                        <span className="text-3xl">{guide.icon}</span>
-                                                        <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getDifficultyStyle(guide.difficulty)}`}>
-                                                            {guide.difficulty}
-                                                        </span>
-                                                    </div>
-                                                    <h3 className="font-display font-bold text-lg text-white mb-2 group-hover:text-merc-accent transition-colors">
-                                                        {guide.title}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-auto">
-                                                        <span className="text-merc-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                                                        <span className="group-hover:text-gray-400 transition-colors">Read Guide</span>
-                                                    </p>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-
-                        {/* No Results */}
-                        {Object.keys(filteredByCategory).length === 0 && (
-                            <div className="text-center py-20 bg-merc-card border border-merc-border rounded-xl">
-                                <div className="text-6xl mb-4">🔍</div>
-                                <h3 className="text-2xl font-display font-bold mb-2 text-white">No Guides Found</h3>
-                                <p className="text-gray-400 mb-4">Try a different search term or category</p>
-                                <button 
-                                    onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
-                                    className="px-6 py-2 bg-merc-accent text-black font-bold rounded-lg hover:bg-merc-accentDark transition-colors"
-                                >
-                                    Clear Filters
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    {filteredGuides.length === 0 && <div className="text-center py-20 bg-merc-card border border-merc-border rounded-xl"><div className="text-6xl mb-4">🔍</div><h3 className="text-2xl font-display font-bold mb-2 text-white">No Guides Found</h3><p className="text-gray-400">Try a different search term</p></div>}
                 </div>
             );
         }
